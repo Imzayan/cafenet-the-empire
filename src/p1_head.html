@@ -3,6 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0c10">
+<script>
+/* فازِ ۶ — PWA: ثبتِ Service-Worker و manifest فقط روی http/https؛ در file:// و WebView بی‌صدا رد می‌شود */
+(function cafenetPwaBoot(){
+  try{
+    var ok = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if(ok){
+      var l = document.createElement('link'); l.rel = 'manifest'; l.href = 'manifest.webmanifest'; document.head.appendChild(l);
+      if('serviceWorker' in navigator) window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+    }
+  }catch(e){}
+})();
+</script>
 <meta name="theme-color" content="#07090c">
 <title>کافه‌نت</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
