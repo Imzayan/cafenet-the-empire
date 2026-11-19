@@ -1132,6 +1132,7 @@ function showSummary(){
   ];
   $('sumRows').innerHTML = rows.filter(Boolean).map(r => '<div class="row"><span>' + r[0] + '</span><b class="' + r[2] + '">' + r[1] + '</b></div>').join('');
   $('summary').hidden = false;
+  if(typeof passAdvance === 'function') passAdvance(); // فازِ ۴ — بتل‌پسِ فصلی
   if(typeof sendScore === 'function') sendScore(); // فازِ ۵ — لیدربورد
   if(ds.angry === 0 && ds.served >= 3) Sfx.rentPaid(); else Sfx.boot();
   checkDailyMissions();

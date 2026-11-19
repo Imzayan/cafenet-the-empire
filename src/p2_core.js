@@ -73,6 +73,7 @@ const Save = {
       story: { ch: 0, seen: [], flags: {}, ally: { rival: 0 } }, // فازِ ۳ — روایت
       crew: [],                                                  // فازِ ۳ — تیمِ فردی
       parts: null,               // فازِ ۳-ب — {cpu,gpu,ram,mon} برای هر میز
+      pass: null,                // فازِ ۴ — بتل‌پسِ فصلی {season,xp,tier,claimed}
       branch: null,              // فازِ ۳-ب — شعبه‌ی دوم {owned,lvl,mgr,last}
     };
   },
@@ -117,6 +118,7 @@ const Save = {
         if(Array.isArray(p.crew)) this.d.crew = p.crew.filter(c => c && typeof c.role === 'string' && typeof c.name === 'string').slice(0, 6);
         if(Array.isArray(p.parts) && p.parts.length === MAX_SLOTS) this.d.parts = p.parts.map(o => o && typeof o === 'object' ? { cpu: clamp(+o.cpu || 1, 1, 5), gpu: clamp(+o.gpu || 1, 1, 5), ram: clamp(+o.ram || 1, 1, 5), mon: clamp(+o.mon || 1, 1, 5) } : { cpu: 1, gpu: 1, ram: 1, mon: 1 });
         if(p.branch && typeof p.branch === 'object') this.d.branch = { owned: !!p.branch.owned, lvl: clamp(Math.floor(+p.branch.lvl || 0), 0, 3), mgr: typeof p.branch.mgr === 'string' ? p.branch.mgr : null, last: Math.max(0, +p.branch.last || 0) };
+        if(p.pass && typeof p.pass === 'object') this.d.pass = { season: clamp(Math.floor(+p.pass.season) || 1, 1, 999), xp: Math.max(0, Math.floor(+p.pass.xp) || 0), tier: clamp(Math.floor(+p.pass.tier) || 0, 0, 20), claimed: Array.isArray(p.pass.claimed) ? p.pass.claimed.filter(n => n >= 1 && n <= 20).slice(0, 20) : [], prem: !!p.pass.prem };
         if(p.dec) Object.assign(this.d.dec, p.dec);
         if(p.loyal) Object.assign(this.d.loyal, p.loyal);
         if(Array.isArray(p.missionsW)) this.d.missionsW = p.missionsW.slice(0,1);

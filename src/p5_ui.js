@@ -236,13 +236,23 @@ function buyUpgrade(u){
 const PREMIUM = [
   { id:'skin_gold',   t:'پوسته‌ی طلایی', d:'نئون، HUD و تمام رنگ‌های کافه طلایی می‌شوند', cost:8, type:'skin', v:'gold', icon:'🟡' },
   { id:'skin_violet', t:'پوسته‌ی بنفش',  d:'نئون و تمام رنگ‌های کافه بنفشِ رویایی می‌شوند', cost:8, type:'skin', v:'violet', icon:'🟣' },
+  { id:'skin_cyber',  t:'پوسته‌ی سایبری', d:'فیروزه‌ایِ نئونی و صورتیِ الکتریکی — حالِ تریون', cost:10, type:'skin', v:'cyber', icon:'🟢' },
+  { id:'skin_forest', t:'پوسته‌ی جنگلی',  d:'سبزِ آرام و زردِ روشن — نفسِ صبحگاهی', cost:8, type:'skin', v:'forest', icon:'🟩' },
+  { id:'skin_sunset', t:'پوسته‌ی غروب',   d:'نارنجیِ گرم و سرخِ پونک — آخرِ روزِ کاری', cost:8, type:'skin', v:'sunset', icon:'🟠' },
+  { id:'skin_mono',   t:'پوسته‌ی مینیمال', d:'سفیدِ تک‌رنگِ خنثی — برای ذوقِ ساده‌نویسی', cost:6, type:'skin', v:'mono', icon:'⚪' },
   { id:'turbo',       t:'توربو اسلایدر', d:'دانلود و گیم ۲۵٪ سریع‌تر — برای همیشه', cost:6, type:'turbo', icon:'⚡' },
 ];
 function applySkin(){
   try{ document.body.dataset.skin = (Save.d.skin && Save.d.skin !== 'classic') ? Save.d.skin : ''; }catch(e){}
   try{ if(typeof buildBG === 'function') buildBG(); }catch(e){}
 }
-function openPremium(){ renderPremium(); $('premium').hidden = false; }
+function openPremium(){
+  renderPremium();
+  if(typeof renderCoinShop === 'function') renderCoinShop();
+  if(typeof renderPass === 'function') renderPass();
+  try{ $('prEnv').textContent = IAP.env(); }catch(e){}
+  $('premium').hidden = false;
+}
 function renderPremium(){
   $('prCoins').textContent = 'سکه: ' + faNum(Save.d.coins) + ' 🪙';
   const list = $('prList');
@@ -633,6 +643,7 @@ function bindUI(){
   $('tutSkip').onclick = () => { Sfx.tickS(); tutI = TUT.length; finishTut(); };
   $('btnPrem').onclick = () => { Sfx.init(); Sfx.resume(); Sfx.tickS(); openPremium(); };
   $('prClose').onclick = () => { Sfx.tickS(); hideFade('premium'); };
+  $('btnIapTest').onclick = () => { Sfx.tickS(); iapSelfTest(); };
   $('crownClose').onclick = () => { Sfx.tickS(); hideFade('crown'); };
   const canOpenRun = () => Save.d.day > 1 || Save.d.week > 1 || Save.d.money > 0;
   $('btnShop2').onclick = () => { Sfx.tickS(); if(!canOpenRun()){ toast('اول کافه را باز کن — یک روز کار کن'); return; } G.money = Save.d.money; openShop(); };
