@@ -60,3 +60,19 @@ node server.js        # پیش‌فرض پورتِ 8088 — PORT=9000 node serve
 ```
 
 سپس بازی از `http://localhost:8088` (همان‌مبدأ) یا فایلِ `cafnet.html` (مبدأِ file:// → localhost:8088). بدونِ سرور هم بازیِ آفلاینِ کامل کار می‌کند. برای استقرارِ عمومی: HTTPS با reverse-proxy و تعویضِ مبدأهای مجاز.
+
+
+## 📲 دانلودِ APK (اندروید ۵+)
+
+**[⬇ دانلودِ مستقیم — cafnet-empire-v1.0.0.apk](https://github.com/Imzayan/cafenet-the-empire/releases/download/v1.0.0/cafnet-empire-v1.0.0.apk)** (~۲۳۳KB، امضاشده v1+v2+v3)
+
+یا از [صفحه‌ی Releases](https://github.com/Imzayan/cafenet-the-empire/releases) — نصب: دانلود → اجازه‌ی «منبعِ ناشناس» → نصب. کاملاً آفلاین.
+
+### بازساختِ APK از سورس
+```bash
+# ابزارها: java 8+ و apktool (apk/dl را خودت پر کن — در گیت نیست)
+java -jar apk/dl/apktool.jar b apk/proj -o out.apk
+java -jar apk/dl/uber-apk-signer.jar --apks out.apk --ks apk/cafnet-release.keystore \
+  --ksAlias cafnet --ksPass cafenet2026 --ksKeyPass cafenet2026 --overwrite
+```
+بازی در `apk/proj/assets/cafnet.html` — با `bash src/build.sh` بیلد و کپی کن، دوباره بیلد و امضا کن.
