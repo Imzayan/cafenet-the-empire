@@ -1,0 +1,15 @@
+# سیستم‌عامل
+.DS_Store
+Thumbs.db
+
+# ابزارها
+*.log
+node_modules/
+
+# بسته‌های پلتفرمی (فازِ ۶ — ساخته‌شده، نه سورس)
+android/
+ios/
+dist/
+
+# خروجی‌های موقتِ build
+*.tmp
