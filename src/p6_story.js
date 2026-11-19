@@ -412,4 +412,123 @@ function openCrew(){
   }
   $('crewOv').hidden = false;
 }
+
+/* ============ فازِ ۳-ب — قطعاتِ تجهیزات و شعبه‌ی دوم ============ */
+const PART_INFO = {
+  cpu: { t: 'پردازنده',    icon: '⚙',  f: 1.0,  eff: 'سرعتِ دانلود و بازی' },
+  gpu: { t: 'کارتِ گرافیک', icon: '🎮', f: 1.15, eff: 'صبرِ گیمرها و سالنِ گیم' },
+  ram: { t: 'رم',          icon: '📊', f: 0.7,  eff: 'مقاومت در برابرِ ویروس' },
+  mon: { t: 'مانیتور',     icon: '🖥', f: 0.5,  eff: 'پرداختِ بیشترِ مشتری' },
+};
+const PART_PRICES = [null, 350000, 700000, 1300000, 2200000];
+const BRANCH_COST = [null, 8000000, 14000000, 22000000];
+
+function deskParts(i){
+  if(!Array.isArray(Save.d.parts) || Save.d.parts.length !== MAX_SLOTS){
+    const t = Math.min(5, lvl('pcTier') || 1);
+    Save.d.parts = Array.from({ length: MAX_SLOTS }, () => ({ cpu: t, gpu: t, ram: t, mon: t }));
+  }
+  if(!Save.d.parts[i]) Save.d.parts[i] = { cpu: 1, gpu: 1, ram: 1, mon: 1 };
+  const p = Save.d.parts[i];
+  for(const k of ['cpu', 'gpu', 'ram', 'mon']) p[k] = clamp(Math.floor(+p[k]) || 1, 1, 5);
+  return p;
+}
+function syncParts(t){ /* خریدِ پکیجِ pcTier → همه‌ی قطعات حداقلِ آن سطح */
+  t = clamp(t, 1, 5);
+  for(let i = 0; i < MAX_SLOTS; i++){
+    const p = deskParts(i);
+    for(const k of ['cpu', 'gpu', 'ram', 'mon']) if(p[k] < t) p[k] = t;
+  }
+}
+function cpuMul(i){ return 0.85 + 0.15 * deskParts(i).cpu; }        // سرعتِ پردازش
+function gpuPat(i){ return 1 + 0.06 * (deskParts(i).gpu - 1); }     // صبرِ گیمرها
+function ramRes(i){ return 1 - 0.08 * (deskParts(i).ram - 1); }     // احتمالِ ویروس
+function monMul(i){ return 0.96 + 0.04 * deskParts(i).mon; }        // پرداختِ مشتری
+function gpuHallReady(){
+  for(let i = 10; i < 16; i++) if(deskOn(i) && deskParts(i).gpu >= 3) return true;
+  return false;
+}
+function partCost(part, nextTier){ return Math.round(PART_PRICES[nextTier] * PART_INFO[part].f / 10000) * 10000; }
+function buyPart(i, part){
+  const p = deskParts(i);
+  if(p[part] >= 5){ toast(PART_INFO[part].t + 'ِ این میز در بیشینه است', 'amber'); return; }
+  const cost = partCost(part, p[part] + 1);
+  if(G.money < cost){ toast('پولِ نقد کافی نیست — ' + fmtK(cost), 'red'); return; }
+  G.money -= cost; G.dayStats.spent += cost;
+  p[part]++;
+  Sfx.buy();
+  toast('🔧 ' + PART_INFO[part].t + 'ِ میزِ ' + faNum(i + 1) + ' → سطحِ ' + faNum(p[part]) + ' (' + fmtK(cost) + ')', 'cyan');
+  persist(); openWorkshop();
+}
+function tierColor(t){ return ['#8a93a3', '#8a93a3', '#59c2ff', '#c06bff', '#f2c14e'][clamp(t, 0, 4)]; }
+
+/* ---------- شعبه‌ی دوم ---------- */
+function branchEarn(){
+  const B = Save.d.branch;
+  if(!B || !B.owned || B.lvl < 1) return 0;
+  return Math.round((500000 + 6000 * G.fame) * B.lvl * (B.mgr ? 1 : 0.65) / 1000) * 1000;
+}
+function buyBranch(){
+  const B = Save.d.branch = Save.d.branch || { owned: false, lvl: 0, mgr: null, last: 0 };
+  if(B.lvl >= 3){ toast('شعبه در بیشینه است', 'amber'); return; }
+  if(STAGES.indexOf(stageInfo()) < 2){ toast('اول باید مرحله‌ی کافه برسد — سالنِ دوم و تورنمنت‌ها', 'red'); return; }
+  const cost = BRANCH_COST[B.lvl + 1];
+  if(G.money < cost){ toast('پولِ نقد کافی نیست — ' + fmtK(cost), 'red'); return; }
+  G.money -= cost;
+  B.owned = true; B.lvl++;
+  const m = lvl('mgr') >= 1 ? crewFor('mgr') : null;
+  if(m && !B.mgr) B.mgr = m.name;
+  Sfx.buy();
+  gainXP(80);
+  toast('🏢 شعبه‌ی دوم — سطحِ ' + faNum(B.lvl) + (B.mgr ? ' با مدیرِ ' + B.mgr : ' (بدونِ مدیر: ۶۵٪ درآمد)'), 'amber');
+  persist(); openWorkshop();
+}
+
+/* ---------- کارگاهِ قطعات + شعبه ---------- */
+function openWorkshop(){
+  const list = $('wsList');
+  list.innerHTML = '';
+  for(let i = 0; i < MAX_SLOTS; i++){
+    if(!deskOn(i)) continue;
+    const p = deskParts(i);
+    const row = document.createElement('div');
+    row.className = 'wsRow';
+    const lbl = document.createElement('b');
+    lbl.textContent = 'میزِ ' + faNum(i + 1);
+    row.appendChild(lbl);
+    for(const part of ['cpu', 'gpu', 'ram', 'mon']){
+      const t = p[part];
+      const bt = document.createElement('button');
+      bt.className = 'pchip';
+      const info = PART_INFO[part];
+      const nxt = t < 5 ? partCost(part, t + 1) : 0;
+      bt.style.borderColor = tierColor(t);
+      bt.innerHTML = '<span style="color:' + tierColor(t) + '">' + info.icon + ' ' + faNum(t) + '</span>'
+        + '<small>' + (t < 5 ? '→ ' + faNum(t + 1) + ' · ' + fmtK(nxt) : 'بیشینه') + '</small>';
+      bt.title = info.t + ' — ' + info.eff;
+      bt.onclick = () => { Sfx.tickS(); buyPart(i, part); };
+      row.appendChild(bt);
+    }
+    list.appendChild(row);
+  }
+  /* بخشِ شعبه — بالای لیست تا گم نشود */
+  const B = Save.d.branch = Save.d.branch || { owned: false, lvl: 0, mgr: null, last: 0 };
+  const br = document.createElement('div');
+  br.className = 'wsBranch';
+  const est = Math.round((500000 + 6000 * G.fame) / 1000) * 1000;
+  let html = '<div class="pt" style="font-size:15px">🏢 شعبه‌ی دوم</div>';
+  if(B.owned){
+    html += '<div class="ps">سطحِ ' + faNum(B.lvl) + ' از ۳ · درآمدِ روزانه‌ی تقریبی: ' + fmtK(branchEarn())
+      + ' · مدیر: ' + (B.mgr || 'ندارد — بدونِ مدیر فقط ۶۵٪ درآمد')
+      + '</div><button class="nbtn ghost" id="btnBranch">ارتقا به سطحِ ' + faNum(B.lvl + 1) + ' — ' + fmtK(BRANCH_COST[B.lvl + 1]) + '</button>';
+  } else {
+    html += '<div class="ps">یک کافه‌ی دیگر در شمالِ شهر — درآمدِ روزانه‌ی غیرمستقیم بر پایه‌ی شهرتِ تو (حدودِ ' + fmtK(est) + ' در روز). شرط: رسیدن به مرحله‌ی ۲.</div>'
+      + '<button class="nbtn ghost" id="btnBranch">خریدِ شعبه — ' + fmtK(BRANCH_COST[1]) + '</button>';
+  }
+  br.innerHTML = html;
+  $('wsBranchBox').innerHTML = '';
+  $('wsBranchBox').appendChild(br);
+  $('btnBranch').onclick = () => { Sfx.tickS(); buyBranch(); };
+  $('wsOv').hidden = false;
+}
 </script>
