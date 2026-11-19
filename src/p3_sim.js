@@ -152,6 +152,12 @@ function spawnCustomer(){
     shirt: pick(CLOTHES), hair: pick(HAIRS),
     name: pick(NAMES),
     visN: 0,
+    skin: pick(SKINS), hairStyle: pick(HAIRSTYLES),
+    hMul: kind === 'teen' ? 0.85 : (kind === 'rich' || kind === 'esports') ? 1.05 : 0.92 + Math.random() * 0.16,
+    wMul: kind === 'teen' ? 0.9 : (kind === 'tourist' || kind === 'rich') ? 1.12 : 0.95 + Math.random() * 0.15,
+    acc: (kind === 'work' || (kind === 'student' && Math.random() < 0.5)) ? 'glasses' : null,
+    headset: kind === 'game' || kind === 'esports',
+    anim: null, animT: 0,
     vip: lvl('vip') >= 1 && Math.random() < 0.1,
     snackWish: lvl('snack') >= 1 && Math.random() < 0.35,
     lan: G.lanDay,
@@ -230,6 +236,7 @@ function completeConsole(c){
   G.runStats.maxCombo = Math.max(G.runStats.maxCombo, G.combo);
   gainXP(4);
   freeConsole(c);
+  if((s.kind === 'esports' || s.kind === 'game' || s.kind === 'teen') && Math.random() < 0.55){ c.anim = 'celebrate'; c.animT = 1.3; }
   customerDone(c, true);
   checkAch();
 }
@@ -369,6 +376,7 @@ function tickSystem(i, dt){
   if(K.drainMul) drain *= K.drainMul;
   if(c.regular) drain *= 0.9;
   s.patience -= drain * dt;
+  if(c.patMax && s.patience / c.patMax < 0.28 && (!c.animT || c.animT <= 0)) c.anim = 'disappoint';
   // پیشرفت — سلامتِ تجهیزات اثر واقعی دارد
   const hpF = hpMul(i);
   if(s.kind === 'print'){
@@ -471,6 +479,7 @@ function serveTea(c){
   floater(c.x + 4, c.y - 44, '+' + fmtK(tip), '#f2c14e');
   if(wantSnack){ G.dayStats.snacks++; G.runStats.snacks++; } else { G.dayStats.teas++; G.runStats.teas++; }
   c.bubble = { text: wantSnack ? pick(SNACK_LINES) : pick(TEA_LINES), t: 2.2 };
+  c.anim = 'drink'; c.animT = 2.2;
   steam(c.x + 6, c.y - 30);
   Sfx.tea();
   // کتریِ دوم: پرتشنه‌ترینِ بقیه هم‌زمان سرو می‌شود
@@ -910,7 +919,7 @@ function tickPeople(dt){
     } else if(c.state === 'consPlay'){
       if(c.sitT > 0) c.sitT -= dt;
       c.bt -= dt;
-      if(c.bt <= 0){ c.bubble = { text: pick(SOLO), t: 2.4 }; c.bt = rnd(8, 18); }
+      if(c.bt <= 0){ c.bubble = { text: pick(SOLO), t: 2.4 }; c.bt = rnd(8, 18); c.anim = 'talk'; c.animT = 1.4; }
       c.progress += dt * (1 + 0.05 * lvl('adsl') + 0.02 * lvl('router'));
       c.patience -= dt;
       if(c.progress >= c.consNeed) completeConsole(c);
@@ -918,9 +927,10 @@ function tickPeople(dt){
     } else if(c.state === 'sit'){
       if(c.sitT > 0) c.sitT -= dt;
       c.bt -= dt;
-      if(c.bt <= 0){ c.bubble = { text: pick(SOLO), t: 2.4 }; c.bt = rnd(8, 18); }
+      if(c.bt <= 0){ c.bubble = { text: pick(SOLO), t: 2.4 }; c.bt = rnd(8, 18); c.anim = 'talk'; c.animT = 1.4; }
     }
     if(c.bubble){ c.bubble.t -= dt; if(c.bubble.t <= 0) c.bubble = null; }
+    if(c.animT > 0){ c.animT -= dt; if(c.animT <= 0) c.anim = null; }
   }
   if(gone.length) G.people = G.people.filter(p => !gone.includes(p));
 }

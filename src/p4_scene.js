@@ -90,7 +90,7 @@ function glow(color){
   return c;
 }
 function putGlow(x, y, r, color, alpha){
-  ctx.globalAlpha = alpha;
+  ctx.globalAlpha = Math.min(1, alpha * (G.glowMul || 1));
   ctx.drawImage(glow(color), x - r, y - r, r * 2, r * 2);
   ctx.globalAlpha = 1;
 }
@@ -294,9 +294,41 @@ function buildBG(){
   g.fillStyle = '#8a95a2';
   g.fillText('اسنک‌بار', 322, 258);
 
+  /* ---- دستگاهِ فروشِ خودکار ---- */
+  const vmX = 770, vmY = 250;
+  g.fillStyle = 'rgba(0,0,0,.3)';
+  g.beginPath(); g.ellipse(vmX, vmY + 2, 22, 4, 0, 0, TAU); g.fill();
+  g.fillStyle = '#101820';
+  rr(g, vmX - 19, vmY - 58, 38, 58, 4); g.fill();
+  g.strokeStyle = 'rgba(255,255,255,.16)'; g.lineWidth = 1.2;
+  rr(g, vmX - 19, vmY - 58, 38, 58, 4); g.stroke();
+  g.fillStyle = '#0a0f16';
+  rr(g, vmX - 15, vmY - 53, 24, 34, 2); g.fill();
+  const vmCols = ['#ff5fa2', '#4cff9e', '#59c2ff', '#f2c14e', '#c08aff'];
+  for(let rI = 0; rI < 3; rI++) for(let cI = 0; cI < 3; cI++){
+    g.fillStyle = vmCols[(rI * 3 + cI) % 5];
+    g.globalAlpha = 0.8;
+    g.fillRect(vmX - 12 + cI * 7.5, vmY - 50 + rI * 10, 5, 8);
+    g.globalAlpha = 1;
+  }
+  g.fillStyle = 'rgba(140,220,255,.14)';
+  rr(g, vmX - 15, vmY - 53, 24, 34, 2); g.fill();
+  g.fillStyle = '#0d1420';
+  rr(g, vmX + 11, vmY - 46, 6, 16, 1.5); g.fill();
+  g.fillStyle = pcol('g',.75);
+  g.fillRect(vmX + 13, vmY - 43, 2.4, 2.4);
+  g.fillStyle = '#05080c';
+  rr(g, vmX - 13, vmY - 14, 22, 8, 1.5); g.fill();
+  g.font = "bold 6.5px " + FONT_STACK; g.textAlign = 'center';
+  g.fillStyle = '#8a95a2';
+  g.fillText('فروشِ خودکار', vmX, vmY + 8);
+
   /* ---- پوسترها ---- */
   poster(g, 62, 54, 22, 30, hexk('p'));
   poster(g, 248, 54, 22, 30, hexk('c'));
+  poster(g, 560, 54, 22, 30, hexk('a'));
+  poster(g, 614, 54, 22, 30, hexk('g'));
+  poster(g, 700, 54, 22, 30, hexk('p'));
 
   /* ---- قاب نئون (متنش پویاست) ---- */
   g.strokeStyle = pcol('g',.3); g.lineWidth = 1.4;
@@ -468,6 +500,13 @@ function buildBG(){
       }
     }
   }
+
+  /* ---- وینیتِ ملایمِ کف ---- */
+  const vgr = g.createRadialGradient(WORLD_W / 2, 320, 170, WORLD_W / 2, 320, 500);
+  vgr.addColorStop(0, 'rgba(0,0,0,0)');
+  vgr.addColorStop(1, 'rgba(0,0,0,.3)');
+  g.fillStyle = vgr;
+  g.fillRect(0, 124, WORLD_W, VH - 124);
   for(const cy of [214, 334]){
     const lg = g.createLinearGradient(0, cy - 40, 0, cy + 40);
     lg.addColorStop(0, 'rgba(255,185,110,0)');
@@ -843,7 +882,10 @@ function drawDesk(i){
     const angry = frac0 < 0.25;
     drawFigure(x, y - 10, {
       shirt: c.shirt, hair: c.hair, H: 26, seated: true, drop: c.sitT,
+      skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: c.wMul,
+      acc: c.acc, headset: c.headset && eff2(s),
       typing: s.kind !== 'print' && !s.virus && s.rebootT <= 0 && eff2(s),
+      pose: c.anim || null, animT: c.animT,
       ph: i * 1.7,
       shakeX: angry && s.kind !== 'print' ? Math.sin(G.t * 30) * 1.4 : 0,
     });
@@ -921,9 +963,17 @@ function drawDesk(i){
   rr(x + 18, y + 15, 9, 17, 1.5); ctx.stroke();
   if(occupied){
     ctx.fillStyle = s.virus ? '#ff4d5e' : (Math.sin(G.t * 4 + i) > 0 ? hexk('g') : pcol('g',.3));
-    ctx.fillRect(x + 21, y + 19, 3, 3);
+    ctx.fillRect(x + 21, y + 17, 3, 3);
     ctx.fillStyle = 'rgba(255,255,255,.08)';
     ctx.fillRect(x + 20, y + 26, 5, 1.4);
+    /* فنِ RGB چرخان */
+    const fh = Math.floor((G.t * 50 + i * 40) % 360);
+    ctx.strokeStyle = 'hsla(' + fh + ',90%,62%,.75)'; ctx.lineWidth = 1.1;
+    ctx.save(); ctx.translate(x + 22.5, y + 23.5); ctx.rotate(G.t * 7 + i);
+    ctx.beginPath(); ctx.moveTo(-2.6, 0); ctx.lineTo(2.6, 0); ctx.moveTo(0, -2.6); ctx.lineTo(0, 2.6); ctx.stroke();
+    ctx.restore();
+    ctx.strokeStyle = 'hsla(' + fh + ',90%,60%,.35)';
+    ctx.beginPath(); ctx.arc(x + 22.5, y + 23.5, 2.9, 0, TAU); ctx.stroke();
   }
   if(!occupied){
     ctx.fillStyle = '#212b3a';
@@ -954,6 +1004,13 @@ function drawDesk(i){
   }
   ctx.fillStyle = '#131a23';
   rr(x - 5, y, 10, 3, 1); ctx.fill();
+  /* لیوانِ چای هنگامِ نوشیدن */
+  if(s.person && s.person.anim === 'drink'){
+    ctx.fillStyle = '#f2c14e';
+    rr(x - 20, y + 3.5, 5, 6, 1.4); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 0.8;
+    rr(x - 20, y + 3.5, 5, 6, 1.4); ctx.stroke();
+  }
   /* بازوها روی لبه‌ی مانیتور — حسِ تایپِ واقعی */
   if(s.person && s.person.state === 'sit' && s.kind !== 'print' && !s.virus && s.rebootT <= 0){
     const j1 = Math.sin(G.t * 13 + i * 1.7) * 1.1, j2 = Math.sin(G.t * 13 + i * 1.7 + 2.1) * 1.1;
@@ -1057,44 +1114,125 @@ function drawSlider(i, p, s){
 
 /* ================= آدم‌ها ================= */
 function drawFigure(cx, baseY, o){
-  const H = o.H || 22;
+  const H = (o.H || 22) * (o.hMul || 1);
+  const BW = o.wMul || 1;
   let hipY = baseY - H * 0.42;
   if(o.drop > 0) hipY -= Math.sin(clamp(o.drop / 0.45, 0, 1) * Math.PI) * 5;
   const headR = H * 0.3;
   let headY = hipY - H * 0.62;
-  if(o.typing){ // تعادلِ طبیعیِ سر و بدن هنگامِ کار
-    cx += Math.sin(G.t * 1.7 + (o.ph || 0)) * 0.5;
-    headY += Math.sin(G.t * 2.6 + (o.ph || 0)) * 0.5;
+  const ph = o.ph || 0;
+  const pose = o.pose || null;
+  if((o.typing || pose === 'talk') && pose !== 'angry'){ // تعادلِ طبیعیِ سر و بدن هنگامِ کار
+    cx += Math.sin(G.t * 1.7 + ph) * 0.5;
+    headY += Math.sin(G.t * 2.6 + ph) * 0.5;
   }
+  if(pose === 'celebrate') hipY += Math.sin(G.t * 10 + ph) * 1.6;
+  if(pose === 'disappoint'){ headY += 1.8; hipY += Math.sin(G.t * 2.2 + ph) * 0.4; }
+  if(pose === 'idle') hipY += Math.sin(G.t * 2.2 + ph) * 0.5;
   if(o.shakeX) cx += o.shakeX;
+  const skin = o.skin || '#e2c9a8';
   if(o.walking){
     const sw = Math.sin((o.walkPh || 0) * 2) * H * 0.16;
-    ctx.strokeStyle = o.shirt; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(cx - 2.5, hipY); ctx.lineTo(cx - 2.5 + sw, baseY); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx + 2.5, hipY); ctx.lineTo(cx + 2.5 - sw, baseY); ctx.stroke();
+    ctx.strokeStyle = o.pants || '#232b38'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(cx - 2.5 * BW, hipY); ctx.lineTo(cx - 2.5 * BW + sw, baseY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx + 2.5 * BW, hipY); ctx.lineTo(cx + 2.5 * BW - sw, baseY); ctx.stroke();
   }
-  ctx.fillStyle = o.shirt;
-  rr(cx - 5.8, hipY - H * 0.62, 11.6, H * 0.64, 4.5); ctx.fill();
-  ctx.strokeStyle = 'rgba(0,0,0,.28)'; ctx.lineWidth = 1;
-  rr(cx - 5.8, hipY - H * 0.62, 11.6, H * 0.64, 4.5); ctx.stroke();
+  /* تنه — سایه‌ی سه‌پله‌ای + rim-light */
+  const tw = 11.6 * BW;
+  const torso = () => rr(cx - tw / 2, hipY - H * 0.62, tw, H * 0.64, 4.5);
+  ctx.fillStyle = o.shirt; torso(); ctx.fill();
+  ctx.save(); torso(); ctx.clip();
+  ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(cx - tw / 2, hipY - H * 0.62 + H * 0.36, tw, H * 0.4);
+  ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(cx + tw / 2 - 1.8, hipY - H * 0.62, 1.8, H * 0.7);
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(0,0,0,.32)'; ctx.lineWidth = 1; torso(); ctx.stroke();
   if(o.apron){
     ctx.fillStyle = 'rgba(10,14,18,.55)';
-    rr(cx - 4, hipY - H * 0.4, 8, H * 0.42, 2); ctx.fill();
+    rr(cx - 4 * BW, hipY - H * 0.4, 8 * BW, H * 0.42, 2); ctx.fill();
   }
-  if(o.typing && o.arms !== false){
-    const jit = Math.sin(G.t * 13 + (o.ph || 0)) * 1.1;
-    const jit2 = Math.sin(G.t * 13 + (o.ph || 0) + 2.1) * 1.1;
-    ctx.strokeStyle = o.shirt; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(cx - 4.6, hipY - H * 0.18); ctx.lineTo(cx - 6.6, hipY + H * 0.2 + jit); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx + 4.6, hipY - H * 0.18); ctx.lineTo(cx + 6.8, hipY + H * 0.2 + jit2); ctx.stroke();
+  /* دست‌ها — پوزِ مستقل به‌ازای هر حالت */
+  ctx.strokeStyle = o.shirt; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+  const arm = (x1, y1, x2, y2) => { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); };
+  if(o.typing && o.arms !== false && !pose){
+    const jit = Math.sin(G.t * 13 + ph) * 1.1, jit2 = Math.sin(G.t * 13 + ph + 2.1) * 1.1;
+    arm(cx - 4.6 * BW, hipY - H * 0.18, cx - 6.6 * BW, hipY + H * 0.2 + jit);
+    arm(cx + 4.6 * BW, hipY - H * 0.18, cx + 6.8 * BW, hipY + H * 0.2 + jit2);
+  } else if(pose === 'drink'){
+    const tA = o.animT || 2.2;
+    const lift = tA > 1.9 ? clamp((2.2 - tA) / 0.3, 0, 1) : tA < 0.45 ? clamp(tA / 0.45, 0, 1) : 1;
+    const hy = hipY + H * 0.2 - lift * H * 0.72;
+    arm(cx + 4.6 * BW, hipY - H * 0.18, cx + 6.4 * BW, hy);
+    arm(cx - 4.6 * BW, hipY - H * 0.18, cx - 6.2 * BW, hipY + H * 0.2);
+    ctx.fillStyle = '#f2c14e'; rr(cx + 5.4 * BW, hy - 4, 4.4, 5, 1.2); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 0.8; rr(cx + 5.4 * BW, hy - 4, 4.4, 5, 1.2); ctx.stroke();
+    ctx.strokeStyle = o.shirt; ctx.lineWidth = 2.2;
+  } else if(pose === 'celebrate'){
+    const wv = Math.sin(G.t * 9 + ph) * 1.4;
+    arm(cx - 4.8 * BW, hipY - H * 0.3, cx - 8.2 * BW, hipY - H * 0.72 + wv);
+    arm(cx + 4.8 * BW, hipY - H * 0.3, cx + 8.2 * BW, hipY - H * 0.72 - wv);
+  } else if(pose === 'angry'){
+    arm(cx - 4.6 * BW, hipY - H * 0.22, cx + 3.6 * BW, hipY + H * 0.08);
+    arm(cx + 4.6 * BW, hipY - H * 0.22, cx - 3.6 * BW, hipY + H * 0.08);
+  } else if(pose === 'disappoint'){
+    arm(cx - 5 * BW, hipY - H * 0.26, cx - 5.6 * BW, hipY + H * 0.3);
+    arm(cx + 5 * BW, hipY - H * 0.26, cx + 5.6 * BW, hipY + H * 0.3);
+  } else if(pose === 'talk'){
+    const g = Math.sin(G.t * 6 + ph) * 2;
+    arm(cx - 4.6 * BW, hipY - H * 0.2, cx - 7.6 * BW, hipY - H * 0.42 + g);
+    arm(cx + 4.6 * BW, hipY - H * 0.2, cx + 6.6 * BW, hipY + H * 0.2);
+  } else if(o.walking){
+    const sw = Math.sin((o.walkPh || 0) * 2) * H * 0.14;
+    arm(cx - 4.8 * BW, hipY - H * 0.3, cx - 5.8 * BW, hipY - H * 0.3 + H * 0.36 - sw);
+    arm(cx + 4.8 * BW, hipY - H * 0.3, cx + 5.8 * BW, hipY - H * 0.3 + H * 0.36 + sw);
+  } else {
+    arm(cx - 4.8 * BW, hipY - H * 0.26, cx - 5.4 * BW, hipY + H * 0.24);
+    arm(cx + 4.8 * BW, hipY - H * 0.26, cx + 5.4 * BW, hipY + H * 0.24);
   }
-  ctx.fillStyle = '#e2c9a8';
+  /* سر + استایلِ مو */
+  ctx.fillStyle = skin;
   ctx.beginPath(); ctx.arc(cx, headY, headR, 0, TAU); ctx.fill();
-  ctx.fillStyle = o.hair || '#1a1a1a';
-  ctx.beginPath();
-  ctx.arc(cx, headY - 0.8, headR + 0.4, Math.PI * 0.92, Math.PI * 2.08);
-  ctx.fill();
-  ctx.fillRect(cx - headR - 0.4, headY - 2, headR * 2 + 0.8, 2);
+  const hs = o.hairStyle || 'buzz';
+  const hc = o.hair || '#1a1a1a';
+  if(hs === 'cap'){
+    ctx.fillStyle = hc;
+    ctx.beginPath(); ctx.arc(cx, headY, headR, Math.PI * 1.15, Math.PI * 1.85); ctx.fill();
+    ctx.fillStyle = o.shirt;
+    ctx.beginPath(); ctx.arc(cx, headY - headR * 0.42, headR * 1.04, Math.PI, 0); ctx.fill();
+    ctx.fillRect(cx, headY - headR * 0.55, headR * 1.9, 1.6);
+  } else {
+    ctx.fillStyle = hc;
+    ctx.beginPath(); ctx.arc(cx, headY - 0.8, headR + 0.4, Math.PI * 0.92, Math.PI * 2.08); ctx.fill();
+    ctx.fillRect(cx - headR - 0.4, headY - 2, headR * 2 + 0.8, 2);
+    if(hs === 'spiky'){
+      for(let sIdx = 0; sIdx < 3; sIdx++){
+        const sx = cx - headR * 0.55 + sIdx * headR * 0.55;
+        ctx.beginPath(); ctx.moveTo(sx - 1.6, headY - headR + 0.6); ctx.lineTo(sx, headY - headR - 2.4); ctx.lineTo(sx + 1.6, headY - headR + 0.6); ctx.closePath(); ctx.fill();
+      }
+    } else if(hs === 'bun'){
+      ctx.beginPath(); ctx.arc(cx, headY - headR - 1.4, headR * 0.46, 0, TAU); ctx.fill();
+    } else if(hs === 'long'){
+      ctx.fillRect(cx - headR - 1.6, headY - 1.5, 2.6, headR * 1.5);
+      ctx.fillRect(cx + headR - 1, headY - 1.5, 2.6, headR * 1.5);
+    } else if(hs === 'curly'){
+      for(let sIdx = 0; sIdx < 3; sIdx++){
+        ctx.beginPath(); ctx.arc(cx - headR * 0.6 + sIdx * headR * 0.6, headY - headR - 0.6, headR * 0.4, 0, TAU); ctx.fill();
+      }
+    }
+  }
+  if(o.acc === 'glasses'){
+    ctx.strokeStyle = 'rgba(226,232,238,.85)'; ctx.lineWidth = 0.9;
+    ctx.beginPath(); ctx.arc(cx - 1.9, headY + 0.4, 1.5, 0, TAU); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx + 1.9, headY + 0.4, 1.5, 0, TAU); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - 0.4, headY + 0.4); ctx.lineTo(cx + 0.4, headY + 0.4); ctx.stroke();
+  }
+  if(o.headset){
+    ctx.strokeStyle = '#2a3542'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx, headY, headR + 1.6, Math.PI * 1.02, Math.PI * 1.98); ctx.stroke();
+    ctx.fillStyle = '#2a3542';
+    rr(cx - headR - 2.6, headY - 1.6, 2.8, 4.2, 1.2); ctx.fill();
+    rr(cx + headR - 0.2, headY - 1.6, 2.8, 4.2, 1.2); ctx.fill();
+    if(o.typing){ ctx.fillStyle = '#59c2ff'; ctx.fillRect(cx - headR - 2, headY - 0.4, 1.2, 1.2); }
+  }
 }
 function drawPerson(c){
   if(c.type === 'clean' || c.type === 'tech'){
@@ -1112,7 +1250,9 @@ function drawPerson(c){
     const color = K ? rgb(K.color) : '#8a94a0';
     drawFigure(c.x, c.y + 9, {
       shirt: c.shirt || color, hair: c.hair, H: 23,
+      skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: c.wMul,
       walking: true, walkPh: c.bob,
+      pose: c.anim || null, animT: c.animT,
     });
     if(c.state === 'angry'){
       ctx.globalAlpha = 0.7;
@@ -1550,6 +1690,8 @@ function drawCat(){
 }
 function drawScene(){
   ctx.save();
+  const dfrG = clamp(G.t / DAY_LEN, 0, 1);
+  G.glowMul = dfrG < 0.22 ? 0.9 : dfrG < 0.62 ? 0.75 : dfrG < 0.85 ? 1.0 : 1.25;
   const z = G.zoom || 1;
   if(z !== 1){
     ctx.translate(ZC.x, ZC.y);
@@ -1583,6 +1725,11 @@ function drawScene(){
   drawStaff();
   drawParticles();
   drawFloaters();
+  /* تینتِ محیطیِ زمانِ روز — صبحِ طلایی/روزِ روشن/عصرِ گرم/شبِ آبی */
+  const dfr = clamp(G.t / DAY_LEN, 0, 1);
+  const tint = dfr < 0.22 ? '255,228,190,0.05' : dfr < 0.62 ? '205,228,255,0.035' : dfr < 0.85 ? '255,172,110,0.075' : '70,100,190,0.13';
+  ctx.fillStyle = 'rgba(' + tint + ')';
+  ctx.fillRect(G.cam.x - 10, -20, VW / (G.zoom || 1) + 20, VH + 40);
   ctx.restore();
 }
 function drawGamingSign(){
