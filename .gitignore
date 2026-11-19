@@ -13,3 +13,5 @@ dist/
 
 # خروجی‌های موقتِ build
 *.tmp
+
+server/data/

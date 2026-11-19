@@ -5,7 +5,7 @@
 
 /* ================= گیتِ کلی ================= */
 const OVERLAYS = ['modal','shop','quests','summary','weekend','gameover','pause','menu','premium','crown'];
-function anyModalOpen(){ return OVERLAYS.some(id => !$(id).hidden); }
+function anyModalOpen(){ return OVERLAYS.some(id => !$(id).hidden) || !$('storyOv').hidden || !$('storyLog').hidden || !$('crewOv').hidden || !$('wsOv').hidden || !$('onlineOv').hidden; }
 function hideFade(id){
   const el = $(id);
   if(el.hidden) return;
@@ -222,6 +222,7 @@ function buyUpgrade(u){
   }
   if(u.id === 'router' || u.id === 'net'){ if(G.activeEvent !== 'outage' && G.activeEvent !== 'netfault') G.budget = budget(); }
   if(u.id === 'wall' || u.id === 'lamp2' || u.id === 'plant2' || u.id === 'poster2' || u.id === 'pcTier') refreshDecor();
+  if(u.id === 'pcTier') syncParts(l + 1); // پکیجِ کامل → همه‌ی قطعات حداقلِ این سطح
   if(u.id === 'tech' || u.id === 'clean' || u.id === 'mgr' || u.id === 'net' || u.id === 'emgr') toast('🧍 ' + u.name + ' استخدام شد — حقوقِ هفتگی: ' + fmtK(staffWeekly(u.id, l + 1)), 'amber');
   persist();
   Sfx.buy();
@@ -602,6 +603,11 @@ function bindUI(){
   };
   document.addEventListener('keydown', e => {
     if(e.key !== 'Escape') return;
+    if(!$('storyOv').hidden){ Sfx.tickS(); stAdvance(); return; }
+    if(!$('storyLog').hidden){ Sfx.tickS(); hideFade('storyLog'); return; }
+    if(!$('crewOv').hidden){ Sfx.tickS(); hideFade('crewOv'); return; }
+    if(!$('wsOv').hidden){ Sfx.tickS(); hideFade('wsOv'); return; }
+    if(!$('onlineOv').hidden){ Sfx.tickS(); hideFade('onlineOv'); return; }
     if(!$('shop').hidden){ Sfx.tickS(); hideFade('shop'); return; }
     if(!$('dash').hidden){ Sfx.tickS(); hideFade('dash'); return; }
     if(G.userPaused && !$('pause').hidden){ G.userPaused = false; hideFade('pause'); return; }
@@ -631,6 +637,16 @@ function bindUI(){
   const canOpenRun = () => Save.d.day > 1 || Save.d.week > 1 || Save.d.money > 0;
   $('btnShop2').onclick = () => { Sfx.tickS(); if(!canOpenRun()){ toast('اول کافه را باز کن — یک روز کار کن'); return; } G.money = Save.d.money; openShop(); };
   $('btnQuests2').onclick = () => { Sfx.tickS(); if(!canOpenRun()){ toast('اول کافه را باز کن — یک روز کار کن'); return; } openQuests(); };
+  /* فازِ ۳ — داستان و تیم */
+  $('btnStory').onclick = () => { Sfx.tickS(); openStoryLog(); };
+  $('btnStoryP').onclick = () => { Sfx.tickS(); openStoryLog(); };
+  $('btnCrew').onclick = () => { Sfx.tickS(); openCrew(); };
+  $('stLogClose').onclick = () => { Sfx.tickS(); hideFade('storyLog'); };
+  $('btnWorkshop').onclick = () => { Sfx.tickS(); openWorkshop(); };
+  $('wsClose').onclick = () => { Sfx.tickS(); hideFade('wsOv'); };
+  $('btnOnline').onclick = () => { Sfx.tickS(); $('onlAddr').textContent = (typeof ONL !== 'undefined') ? ONL.api.replace(/^https?:\/\//, '') : 'localhost'; openOnline(); };
+  $('onlClose').onclick = () => { Sfx.tickS(); hideFade('onlineOv'); };
+  $('crewClose').onclick = () => { Sfx.tickS(); hideFade('crewOv'); };
   $('sumNext').onclick = () => { Sfx.tickS(); nextDay(); };
   $('wkPay').onclick = () => { Sfx.tickS(); payRent(); };
   $('wkShop').onclick = () => {

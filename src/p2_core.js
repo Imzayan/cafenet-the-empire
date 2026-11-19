@@ -70,6 +70,10 @@ const Save = {
       powerSpike: false,         // برقِ گرانِ امروز
       tourPend: null,            // تورنمنتِ فردا
       ltDone: [], seenTut: false,
+      story: { ch: 0, seen: [], flags: {}, ally: { rival: 0 } }, // فازِ ۳ — روایت
+      crew: [],                                                  // فازِ ۳ — تیمِ فردی
+      parts: null,               // فازِ ۳-ب — {cpu,gpu,ram,mon} برای هر میز
+      branch: null,              // فازِ ۳-ب — شعبه‌ی دوم {owned,lvl,mgr,last}
     };
   },
   load(){
@@ -102,6 +106,17 @@ const Save = {
         if(p.bank) Object.assign(this.d.bank, p.bank);
         if(p.rivalFame) Object.assign(this.d.rivalFame, p.rivalFame);
         if(p.staff2) Object.assign(this.d.staff2, p.staff2);
+        if(p.story && typeof p.story === 'object'){
+          this.d.story = {
+            ch: clamp(Math.floor(+p.story.ch || 0), 0, 10),
+            seen: Array.isArray(p.story.seen) ? p.story.seen.filter(s => s && typeof s === 'object' && typeof s.i === 'number').slice(0, 12) : [],
+            flags: (p.story.flags && typeof p.story.flags === 'object') ? p.story.flags : {},
+            ally: { rival: clamp(Math.floor((p.story.ally && +p.story.ally.rival) || 0), -3, 3) },
+          };
+        }
+        if(Array.isArray(p.crew)) this.d.crew = p.crew.filter(c => c && typeof c.role === 'string' && typeof c.name === 'string').slice(0, 6);
+        if(Array.isArray(p.parts) && p.parts.length === MAX_SLOTS) this.d.parts = p.parts.map(o => o && typeof o === 'object' ? { cpu: clamp(+o.cpu || 1, 1, 5), gpu: clamp(+o.gpu || 1, 1, 5), ram: clamp(+o.ram || 1, 1, 5), mon: clamp(+o.mon || 1, 1, 5) } : { cpu: 1, gpu: 1, ram: 1, mon: 1 });
+        if(p.branch && typeof p.branch === 'object') this.d.branch = { owned: !!p.branch.owned, lvl: clamp(Math.floor(+p.branch.lvl || 0), 0, 3), mgr: typeof p.branch.mgr === 'string' ? p.branch.mgr : null, last: Math.max(0, +p.branch.last || 0) };
         if(p.dec) Object.assign(this.d.dec, p.dec);
         if(p.loyal) Object.assign(this.d.loyal, p.loyal);
         if(Array.isArray(p.missionsW)) this.d.missionsW = p.missionsW.slice(0,1);

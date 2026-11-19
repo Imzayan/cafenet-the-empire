@@ -1238,6 +1238,7 @@ function drawPerson(c){
   if(c.type === 'clean' || c.type === 'tech'){
     drawFigure(c.x, c.y + 9, {
       shirt: c.type === 'clean' ? '#4a6b55' : '#3e556b', hair: c.hair, H: 22,
+      skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: 1,
       walking: true, walkPh: c.bob,
     });
     faText(c.type === 'clean' ? '🧹' : '🔧', c.x + (c.dir > 0 ? 9 : -9), c.y - 6, 8, '#dfe6ec', 'center');

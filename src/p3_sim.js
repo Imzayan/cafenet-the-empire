@@ -46,8 +46,14 @@ function startDay(){
   }
   G.people = []; G.queue = []; G.particles = []; G.leaving = [];
   G.console = [{ c: null }, { c: null }];
-  if(lvl('clean')) G.people.push({ type:'clean', x: 80, y: 505, dir: 1, bt: rnd(1,3), ph: rnd(0, TAU), shirt: pick(CLOTHES), hair: pick(HAIRS), bub: null });
-  if(lvl('tech')) G.people.push({ type:'tech', x: 700, y: 398, dir: -1, bt: rnd(1,3), ph: rnd(0, TAU), shirt: pick(CLOTHES), hair: pick(HAIRS), bub: null, fixT: 0 });
+  if(lvl('clean')){
+    const cm = crewFor('clean') || {};
+    G.people.push({ type:'clean', x: 80, y: 505, dir: 1, bt: rnd(1,3), ph: rnd(0, TAU), shirt: cm.shirt || pick(CLOTHES), hair: cm.hair || pick(HAIRS), skin: cm.skin, hairStyle: cm.hairStyle, hMul: 0.94, bub: null });
+  }
+  if(lvl('tech')){
+    const cm = crewFor('tech') || {};
+    G.people.push({ type:'tech', x: 700, y: 398, dir: -1, bt: rnd(1,3), ph: rnd(0, TAU), shirt: cm.shirt || pick(CLOTHES), hair: cm.hair || pick(HAIRS), skin: cm.skin, hairStyle: cm.hairStyle, hMul: 0.98, bub: null, fixT: 0 });
+  }
   G.budget = budget(); G.evIdx = 0; G.dIdx = 0; G.activeEvent = null;
   G.combo = 0; G.streak = 0; G.risk = 0; G.teaCd = 0;
   G.printerJob = -1; G.paused = false; G.userPaused = false; G.frozen = true;
@@ -111,6 +117,9 @@ function buildAmbient(){
   G.people.push({ type:'amb', x: 254, y: 106, bob: rnd(0, TAU), bt: rnd(2,5), turn: 1, shirt: pick(CLOTHES), hair: pick(HAIRS) });
   // قلیان‌سوارِ گوشه — خودش دود می‌دهد
   G.people.push({ type:'amb', x: 300, y: 108, bob: rnd(0, TAU), bt: rnd(4,9), turn: 0, shirt: pick(CLOTHES), hair: pick(HAIRS), smoker: true });
+    /* شبِ استراحتِ تیم + بررسیِ فصلِ بعدیِ داستان */
+    if(Save.d.crew && Save.d.crew.length) for(const cm of Save.d.crew) cm.fatigue = clamp(cm.fatigue - 8, 0, 100);
+    if(typeof checkStory === 'function') checkStory();
 }
 function pickKind(){
   if(G.kindForce){ const ks = KIND_KEYS.filter(k => G.kindForce.includes(k)); if(ks.length) return pick(ks); }
@@ -256,7 +265,7 @@ function freeDesk(fk){
   if(K && (K.payMulC || K.fameOn)){
     for(let i = 16; i < MAX_SLOTS; i++) if(deskOn(i) && !G.systems[i].cust) return i;
   }
-  if((k === 'game' || k === 'esports') && lvl('pcTier') >= 2){
+  if((k === 'game' || k === 'esports') && (lvl('pcTier') >= 2 || gpuHallReady())){
     for(let i = 10; i < 16; i++) if(deskOn(i) && !G.systems[i].cust) return i; // گیمر: سالنِ گیم قبل از سالنِ اصلی
   }
   if(k === 'student' || k === 'poor'){
@@ -274,6 +283,7 @@ function seatCustomer(c, i){
   c.sitT = 0.45;
   if(i >= 10) G.cam.target = clamp(p.x - 170, 0, WORLD_W - VW);
   s.kind = c.kind; s.need = c.need; s.patience = c.patience; s.patMax = c.patMax;
+    if(s.kind === 'game' || s.kind === 'esports'){ const gm = gpuPat(i); s.patience *= gm; s.patMax *= gm; }
   s.progress = 0; s.virus = false; s.virusT = 0; s.rebootT = 0; s.seatT = G.t; s.vip = c.vip;
   s.bootT = 0.45; s.vipDesk = i >= 16;
   s.cust = c.id; s.person = c;
@@ -288,10 +298,12 @@ function seatCustomer(c, i){
     for(let j = 0; j < MAX_SLOTS; j++){ if(!deskOn(j)) continue; const o = G.systems[j]; if(o.kind && o.kind !== 'print' && !o.virus) targets.push(j); }
     if(targets.length){
       const j = pick(targets), os = G.systems[j];
-      os.prevAlloc = os.alloc; os.virus = true; os.virusT = virusDur(); os.alloc = 20;
-      if(!G.activeEvent){ G.activeEvent = 'virus'; G.evT = virusDur(); }
-      rescaleAllocs();
-      toast('⚠ یک مشتریِ دردسرساز ویروس پخش کرد!', 'pink');
+      if(Math.random() < ramRes(j)){
+        os.prevAlloc = os.alloc; os.virus = true; os.virusT = virusDur(); os.alloc = 20;
+        if(!G.activeEvent){ G.activeEvent = 'virus'; G.evT = virusDur(); }
+        rescaleAllocs();
+        toast('⚠ یک مشتریِ دردسرساز ویروس پخش کرد!', 'pink');
+      } else toast('🛡 رمِ سطح‌بالا ویروس را خنثی کرد!', 'cyan');
     }
   }
   Sfx.tickS();
@@ -382,7 +394,7 @@ function tickSystem(i, dt){
   if(s.kind === 'print'){
     if(G.printerJob === i && s.rebootT <= 0) s.progress += PRINT_RATE * printMul() * hpF * dt;
   } else {
-    const pm = (s.vis === 'dl' || s.vis === 'game' || s.kind === 'dl' || s.kind === 'game') ? progMul() : 1;
+    const pm = (s.vis === 'dl' || s.vis === 'game' || s.kind === 'dl' || s.kind === 'game') ? progMul() * cpuMul(i) : 1;
     s.progress += (eff / Math.max(1, s.need)) / K.dur * pm * hpF * dt;
   }
   // تجهیزاتِ فرسوده گاهی خودشان ری‌استارت می‌شوند
@@ -400,7 +412,7 @@ function completeCustomer(i){
   const s = G.systems[i], c = s.person;
   const K = KINDS[s.kind];
   const comboMul = 1 + 0.15 * (G.combo + lvl('mgr'));
-  let pay = K.pay * payMul() * comboMul * (K.payMulC || 1);
+  let pay = K.pay * payMul() * comboMul * (K.payMulC || 1) * monMul(i);
   if(s.vip) pay *= 2;
   if(G.activeEvent === 'sponsor') pay *= 1.5;
   if(G.activeEvent === 'fest') pay *= 0.85;
@@ -462,6 +474,7 @@ function completeCustomer(i){
   Sfx.pay(); Sfx.happy();
   if(G.combo >= 2) Sfx.combo(G.combo);
   bumpMissions();
+  if(typeof checkStory === 'function') checkStory();
 }
 
 /* ================= چای ================= */
@@ -954,7 +967,8 @@ function tickAmbient(dt){
     if(w.type !== 'clean' && w.type !== 'tech') continue;
     if(w.bub){ w.bub.t -= dt; if(w.bub.t <= 0) w.bub = null; }
     if(w.pauseT > 0){ w.pauseT -= dt; continue; }
-    w.x += w.dir * (w.type === 'clean' ? 22 : 40) * dt;
+    const wmul = (w.type === 'clean' || w.type === 'tech') ? crewMul(w.type) : 1;
+    w.x += w.dir * (w.type === 'clean' ? 22 : 40) * dt * wmul;
     w.bob += dt * 9;
     if(w.type === 'clean' && Math.random() < dt * 2.2) dust(w.x + rnd(-6, 6), w.y + 6);
     if(w.x > 700){ w.dir = -1; w.pauseT = rnd(1.2, 2.6); }
@@ -1039,14 +1053,20 @@ function endDay(){
   for(const sid of ['tech','clean','mgr','net','emgr']){
     if(lvl(sid) >= 1 && Save.d.staffXp) Save.d.staffXp[sid] = Math.min(40, (Save.d.staffXp[sid] || 0) + 1);
   }
+  /* خستگیِ شبِ کار + روحیه */
+  if(Save.d.crew && Save.d.crew.length) for(const cm of Save.d.crew){
+    cm.fatigue = clamp(cm.fatigue + 12, 0, 100);
+    cm.happy = clamp(cm.happy + (cm.fatigue > 80 ? -6 : 2), 10, 100);
+  }
   const tl = lvl('tech');
   if(tl >= 1){
     let fixed = 0;
     const xpB = 1 + Math.min(0.3, (Save.d.staffXp.tech || 0) * 0.008);
+    const tmul = crewMul('tech');
     for(let i = 0; i < MAX_SLOTS && fixed < tl; i++){
       if(!deskOn(i)) continue;
       if(sysHp(i) < 60){
-        Save.d.hp[i] = clamp(sysHp(i) + Math.round((8 + 6 * tl) * xpB), 5, 100);
+        Save.d.hp[i] = clamp(sysHp(i) + Math.round((8 + 6 * tl) * xpB * tmul), 5, 100);
         const fee = 30000;
         if(G.money >= fee){ G.money -= fee; ds.spent += fee; G.runStats.repairPaid = (G.runStats.repairPaid || 0) + fee; }
         fixed++;
@@ -1090,10 +1110,16 @@ function showSummary(){
   $('sumSub').textContent = ds.angry === 0
     ? 'روزی آرام — هیچ مشتری‌ای عصبانی نرفت.'
     : faNum(ds.angry) + ' مشتری عصبانی رفت؛ فردا بهترش کن.';
+  /* شعبه‌ی دوم — درآمدِ غیرمستقیمِ امروز */
+  const br = branchEarn();
+  if(br > 0){ G.money += br; ds.earned += br; G.weekStats.earn += br; Save.d.branch.last = br; }
+  const B = Save.d.branch;
+  if(B && B.owned && !B.mgr && lvl('mgr') >= 1){ const m = crewFor('mgr'); if(m){ B.mgr = m.name; toast('🏢 ' + m.name + ' مدیرِ شعبه‌ی دوم شد', 'cyan'); } }
   const rows = [
     ['درآمد امروز', fmtK(ds.earned), 'g'],
     ['انعام چای و اسنک', fmtK(ds.tipEarned), 'a'],
     ['درآمد چاپ', fmtK(ds.printRev || 0), 'a'],
+    br > 0 ? ['درآمدِ شعبه‌ی دوم', '+' + fmtK(br), 'g'] : null,
     ds.internet ? ['اینترنت', '−' + fmtK(ds.internet), 'r'] : null,
     ds.materials ? ['مواد اولیه', '−' + fmtK(ds.materials), 'r'] : null,
     ds.power ? ['هزینه‌ی برق', '−' + fmtK(ds.power), 'r'] : null,
@@ -1106,6 +1132,7 @@ function showSummary(){
   ];
   $('sumRows').innerHTML = rows.filter(Boolean).map(r => '<div class="row"><span>' + r[0] + '</span><b class="' + r[2] + '">' + r[1] + '</b></div>').join('');
   $('summary').hidden = false;
+  if(typeof sendScore === 'function') sendScore(); // فازِ ۵ — لیدربورد
   if(ds.angry === 0 && ds.served >= 3) Sfx.rentPaid(); else Sfx.boot();
   checkDailyMissions();
 }

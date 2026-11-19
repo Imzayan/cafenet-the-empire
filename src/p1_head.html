@@ -248,6 +248,41 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
 #tutSkip{font-family:inherit;font-size:10px;padding:5px 14px;border-radius:10px;background:transparent;
   border:1px solid var(--line2);color:var(--dim)}
 .revStars{color:var(--amber);font-size:11px}
+  /* فازِ ۳ — دیالوگ، دفترچه، تیم */
+  .storycard{max-width:340px;text-align:center;padding:14px 12px}
+  #stPortrait{margin:0 auto;display:block;border-radius:14px;box-shadow:0 0 0 1px rgba(255,255,255,.1)}
+  #stText{min-height:84px;line-height:2;font-size:13px;color:#e9eef2;margin:10px 2px 6px;text-align:right}
+  .stq{font-size:12.5px;color:var(--amber);margin:6px 0 8px}
+  .stopt{width:100%;text-align:right;line-height:1.6;margin-bottom:8px}
+  .stopt .note,.logrow .note,.crewInfo .note{display:block;font-size:10.5px;color:var(--dim);margin-top:2px}
+  .logrow{width:100%;text-align:right;margin-bottom:6px;line-height:1.5}
+  .crewRow{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;text-align:right}
+  .crewRow canvas{border-radius:10px;flex-shrink:0}
+  .crewInfo{flex:1;min-width:0;font-size:12px}
+  .crewInfo b{color:var(--ink)}
+  .fbarL{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:10.5px;color:var(--dim);white-space:nowrap}
+  .fbar{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+  .fbar i{display:block;height:100%;border-radius:3px}
+  .crewRow .rest{flex-shrink:0;font-size:11px;padding:6px 10px}
+  /* فازِ ۳-ب — کارگاهِ قطعات */
+  .wsRow{display:flex;align-items:center;gap:8px;padding:7px;border:1px solid var(--line);border-radius:10px;margin-bottom:7px}
+  .wsRow b{font-size:11px;color:var(--dim);width:52px;flex-shrink:0;text-align:right}
+  .pchip{flex:1;padding:7px 4px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+  .pchip small{font-size:9px;color:var(--dim);white-space:nowrap}
+  .wsBranch{border:1px solid var(--amber);border-radius:12px;padding:10px;text-align:center;margin-top:6px}
+  .wsBranch .nbtn{margin-top:8px;width:100%}
+  /* فازِ ۵ — آنلاین */
+  .inp{width:100%;box-sizing:border-box;padding:10px 12px;margin:6px 0;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);font:inherit;font-size:14px}
+  .inp::placeholder{color:var(--dim)}
+  .onlBox{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px}
+  .lbHead,.lbRow{display:flex;gap:8px;align-items:center;padding:6px 4px;font-size:12px}
+  .lbHead{color:var(--dim);font-size:11px}
+  .lbHead span,.lbRow span{width:22px;text-align:center;flex-shrink:0}
+  .lbHead b,.lbRow b{flex:1;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .lbRow.me{background:rgba(89,194,255,.12);border-radius:8px}
+  .lbHead i,.lbRow i{font-style:normal;min-width:56px;text-align:left}
+  .lbHead i{color:var(--dim)}
+  .lbRow i{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -278,12 +313,14 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
         <div class="mgrid">
           <button class="nbtn ghost" id="btnShop2">🛠 ارتقای کافه</button>
           <button class="nbtn ghost" id="btnQuests2">✦ ماموریت‌ها</button>
+          <button class="nbtn ghost" id="btnStory">📖 داستان</button>
           <button class="nbtn ghost" id="btnPrem">🪙 فروشگاه پرمیوم</button>
           <button class="nbtn ghost" id="btnHow">📜 قوانین در یک نگاه</button>
+          <button class="nbtn ghost" id="btnOnline">☁ آنلاین</button>
         </div>
       </div>
       <div id="menuLegacy" style="font-size:11px;color:var(--amber);margin-top:14px;text-align:center"></div>
-      <div class="mfoot">آفلاین · لمسی · پیشرفت ذخیره می‌شود</div>
+      <div class="mfoot">آفلاین و لمسی · ذخیره‌ی محلیِ همیشگی · ☁ آنلاینِ اختیاری</div>
     </div>
   </div>
 
@@ -310,6 +347,7 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
         <button class="fchip" id="shopSort">⇅ قیمت</button>
       </div>
       <div id="shopList"></div>
+      <button class="nbtn ghost" id="btnWorkshop">🔧 کارگاهِ قطعات و شعبه‌ی دوم</button>
       <button class="closeX" id="shopClose">بستن</button>
     </div>
   </div>
@@ -452,8 +490,60 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
         <div class="volRow"><label>🔊 افکت</label><input type="range" id="volS" min="0" max="100" value="80"></div>
         <div class="volRow"><label>🎵 موسیقی</label><input type="range" id="volM" min="0" max="100" value="50"></div>
         <button class="nbtn ghost" id="btnSaveMan">💾 ذخیره‌ی دستی</button>
+        <button class="nbtn ghost" id="btnStoryP">📖 داستانِ امپراتوری</button>
+        <button class="nbtn ghost" id="btnCrew">👥 تیمِ کافه</button>
         <button class="nbtn ghost" id="btnToMenu">منوی اصلی (ذخیره می‌شود)</button>
       </div>
+    </div>
+  </div>
+
+  <!-- فازِ ۳ — دیالوگِ داستان -->
+  <div id="storyOv" class="ov" hidden>
+    <div class="card storycard">
+      <canvas id="stPortrait" width="88" height="88"></canvas>
+      <div class="pt" id="stName"></div>
+      <div class="ps" id="stRole"></div>
+      <div id="stText"></div>
+      <div class="mbtns" id="stBtns"></div>
+    </div>
+  </div>
+
+  <!-- فازِ ۳ — دفترچه‌ی داستان -->
+  <div id="storyLog" class="ov" hidden>
+    <div class="card" style="max-width:340px">
+      <div class="pt">📖 داستانِ امپراتوری</div>
+      <div id="stLogList" style="margin:10px 0;max-height:46vh;overflow:auto"></div>
+      <div class="mbtns"><button class="nbtn ghost" id="stLogClose">بستن</button></div>
+    </div>
+  </div>
+
+  <!-- فازِ ۳ — تیمِ کافه -->
+  <div id="crewOv" class="ov" hidden>
+    <div class="card" style="max-width:360px">
+      <div class="pt">👥 تیمِ کافه</div>
+      <div id="crewList" style="margin:10px 0;max-height:52vh;overflow:auto"></div>
+      <div class="mbtns"><button class="nbtn ghost" id="crewClose">بستن</button></div>
+    </div>
+  </div>
+
+  <!-- فازِ ۵ — آنلاینِ اختیاری -->
+  <div id="onlineOv" class="ov" hidden>
+    <div class="card" style="max-width:380px">
+      <div class="pt">☁ آنلاین</div>
+      <div class="ps">اختیاری و جدای از بازیِ آفلاین — حساب، ذخیره‌ی ابری و جدولِ امتیازات. سرور: <span id="onlAddr" style="direction:ltr"></span></div>
+      <div id="onlBody" style="margin:10px 0;max-height:56vh;overflow:auto"></div>
+      <div class="mbtns"><button class="nbtn ghost" id="onlClose">بستن</button></div>
+    </div>
+  </div>
+
+  <!-- فازِ ۳-ب — کارگاهِ قطعات و شعبه -->
+  <div id="wsOv" class="ov" hidden>
+    <div class="card" style="max-width:400px">
+      <div class="pt">🔧 کارگاهِ قطعات</div>
+      <div class="ps">هر میز، چهار قطعه با ویژگیِ مستقل — روی چیپ بزن تا ارتقا یابد. عنوانِ هر چیپ، اثرش را می‌گوید.</div>
+      <div id="wsBranchBox"></div>
+      <div id="wsList" style="margin:10px 0;max-height:56vh;overflow:auto"></div>
+      <div class="mbtns"><button class="nbtn ghost" id="wsClose">بستن</button></div>
     </div>
   </div>
 </div>
