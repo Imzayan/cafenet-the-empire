@@ -192,3 +192,10 @@
 
 فیکس: مانیفستِ مادر → versionCode 7 / versionName 1.6.1؛ resources.arsc → STORED (0٪ فشرده‌سازی)؛ zipalign + امضای v1+v2+v3 با همان keystore. دِکودِ نهاییِ APKٔ امضاشده برای اثبات انجام شد (نه فقط خروجیِ ابزار).
 آپدیت‌کنندهٔ داخل بازی از قبل محکم بود (نسخهٔ داخلِ فایلِ دانلودشده اعتبارسنجی می‌شود).
+
+## v1.7.0 (versionCode 8) — مونتیزیشنِ واقعی
+
+- پروژهٔ Gradle/Kotlin تازه با همان package و همان keystore: Bridge امنِ JS↔Native، پرداختِ مایکت (ir.myket:billing:2.2 — تأیید→ثبتِ سرور→consume→تحویلِ یک‌بار)، تبلیغِ Rewarded تپسل Mediation 1.4.0-alpha04 (جایزه فقط در onRewarded + تأییدِ سرور).
+- Backend مستقل (Node/TS/Express/PostgreSQL): ۱۲ جدول، Ledger اتمیک، ضدِ replay/idempotent، rate limit، ۳۱/۳۱ تستِ یکپارچهٔ واقعی.
+- بازی: ماژولِ MONEY (پل + فروشگاهِ قیمتِ SDK + جایگاه‌های تبلیغ + VIP/بتل‌پسِ ابری)؛ provider آزمایشی و قیمت‌های هاردکد به‌کلی حذف؛ همهٔ امکاناتِ قبلی دست‌نخورده.
+- اجازهٔ INTERNET به شل اضافه شد (در نسخه‌های قبلی نبود و آپدیت‌کنندهٔ HTML عملاً کار نمی‌کرد).

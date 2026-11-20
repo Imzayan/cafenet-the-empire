@@ -1,0 +1,13 @@
+{
+  "_comment": "شناسه‌ها دقیقاً مطابقِ پنلِ مایکت — قیمت اینجا نیست؛ فقط از SDK می‌آید",
+  "products": [
+    { "sku": "gold_pack_1",    "type": "consumable",     "title": "بسته کوچک سکه",    "grant": { "gold": 10 } },
+    { "sku": "gold_pack_2",    "type": "consumable",     "title": "بسته متوسط سکه",   "grant": { "gold": 25 } },
+    { "sku": "gold_pack_3",    "type": "consumable",     "title": "بسته بزرگ سکه",    "grant": { "gold": 60 } },
+    { "sku": "diamond_pack_1", "type": "consumable",     "title": "بسته کوچک الماس",  "grant": { "diamonds": 50 } },
+    { "sku": "diamond_pack_2", "type": "consumable",     "title": "بسته بزرگ الماس",  "grant": { "diamonds": 120 } },
+    { "sku": "starter_bundle", "type": "consumable",     "title": "بسته شروع بازی",   "grant": { "gold": 15, "diamonds": 30, "skin": "cyber", "repairs": 2 } },
+    { "sku": "remove_ads",     "type": "non_consumable", "title": "حذف تبلیغات",      "grant": {} },
+    { "sku": "vip_monthly",    "type": "subscription",   "title": "عضویت ماهانه VIP", "grant": { "vipDays": 30 } }
+  ]
+}

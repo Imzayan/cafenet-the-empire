@@ -261,8 +261,15 @@ function openPremium(){
   renderPremium();
   if(typeof renderCoinShop === 'function') renderCoinShop();
   if(typeof renderPass === 'function') renderPass();
-  try{ $('prEnv').textContent = IAP.env(); }catch(e){}
+  if(typeof renderAdsBox === 'function') renderAdsBox();      // فازِ ۶ — پاداشِ تبلیغ
+  if(typeof renderVipBox === 'function') renderVipBox();      // فازِ ۶ — VIP/الماس
+  $('prEnv').textContent = (typeof MONEY !== 'undefined' && MONEY.isBridge()) ? 'MYKET-REAL' : 'OFFLINE';
   $('premium').hidden = false;
+  /* فازِ ۶ — تازه‌سازیِ قیمتِ واقعی از SDK و وضعیتِ ابری */
+  if(typeof MONEY !== 'undefined' && MONEY.isBridge()){
+    if(!MONEY.state.products) MONEY.refreshProducts().then(() => { renderCoinShop(); renderVipBox(); });
+    MONEY.refreshWallet().then(() => { renderVipBox(); renderAdsBox(); });
+  }
 }
 function renderPremium(){
   $('prCoins').textContent = 'سکه: ' + faNum(Save.d.coins) + ' 🪙';

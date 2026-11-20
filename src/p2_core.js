@@ -95,6 +95,11 @@ const Save = {
       parts: null,               // فازِ ۳-ب — {cpu,gpu,ram,mon} برای هر میز
       pass: null,                // فازِ ۴ — بتل‌پسِ فصلی {season,xp,tier,claimed}
       branch: null,              // فازِ ۳-ب — شعبه‌ی دوم {owned,lvl,mgr,last}
+      diamonds: 0,               // فازِ ۶ — الماسِ ممتاز (آینهٔ wallet سرور)
+      freeRepairs: 0,            // فازِ ۶ — ووچرهای تعمیرِ رایگانِ تبلیغ
+      lastIncome: 0,             // فازِ ۶ — درآمدِ آخرین روزِ کامل‌شده (برای جایزهٔ دوبرابر)
+      adsLeft: null,             // فازِ ۶ — cacheِ claimsLeftToday از سرور
+      cloud: null,               // فازِ ۶ — وضعیتِ ابری {wallet,vip,removeAds,ts}
     };
   },
   load(){
@@ -116,7 +121,7 @@ const Save = {
         // مهاجرتِ v1/v2 → ۳ با همین ادغامِ کامل و امن
         this.d = this.defaults();
         // ادغامِ امنِ یک‌سطحی + تو در تو
-        for(const k of ['week','day','money','fame','xp','legacy','sound','seenHow','coins','skin','turbo','crowned']) if(k in p) this.d[k] = p[k];
+        for(const k of ['week','day','money','fame','xp','legacy','sound','seenHow','coins','skin','turbo','crowned','diamonds','freeRepairs','lastIncome']) if(k in p) this.d[k] = p[k];
         if('_level' in p) this.d._level = Math.max(1, Math.min(10, +p._level || 1)); // سطحِ بازیکن بعد از «ادامه» ریست نشود
         if(p.up) Object.assign(this.d.up, p.up);
         if(Array.isArray(p.ach)) this.d.ach = p.ach.filter(x => typeof x === 'string');

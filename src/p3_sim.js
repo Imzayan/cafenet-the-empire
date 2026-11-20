@@ -1026,6 +1026,7 @@ function tickAmbient(dt){
 function endDay(){
   const ds = G.dayStats;
   G.runStats.bestDay = Math.max(G.runStats.bestDay, ds.earned);
+  Save.d.lastIncome = Math.max(0, Math.round(ds.earned || 0)); // فازِ ۶ — زمینهٔ جایزهٔ «دوبرابرِ درآمد»
   const st = $('sumStars');
   if(ds.angry === 0 && ds.served >= 8) st.textContent = '★★★';
   else if(ds.angry <= 1 && ds.served >= 5) st.textContent = '★★☆';
@@ -1322,6 +1323,15 @@ function rebuyDesk(i){
 function repairDesk(i){
   const cost = repairCost(i);
   if(sysHp(i) >= 100) return false;
+  if((Save.d.freeRepairs || 0) > 0){                       // فازِ ۶ — ووچرِ تعمیرِ رایگانِ تبلیغ
+    Save.d.freeRepairs--;
+    Save.d.hp[i] = 100;
+    G.systems[i].rebootT = Math.min(G.systems[i].rebootT, 0.1);
+    persist();
+    toast('🎬 تعمیرِ رایگان با ووچرِ تبلیغ — میز ' + faNum(i + 1), 'green');
+    Sfx.boot();
+    return true;
+  }
   if(G.money < cost){ toast('پولِ تعمیر کافی نیست — ' + fmtK(cost), 'pink'); return false; }
   G.money -= cost; G.dayStats.spent += cost;
   G.runStats.repairPaid = (G.runStats.repairPaid || 0) + cost;

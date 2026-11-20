@@ -1,0 +1,28 @@
+{
+  "ads": {
+    "maxPerDay": 5,
+    "cooldownSeconds": 300,
+    "placements": {
+      "double_income": { "kind": "gold", "formula": "double_income", "cap": 400 },
+      "repair":        { "kind": "voucher", "perDay": 1 },
+      "xp_bonus":      { "kind": "xp", "amount": 50 },
+      "gold_drop":     { "kind": "gold", "amount": 5 },
+      "event_bonus":   { "kind": "diamonds", "amount": 1, "perDay": 1 },
+      "mission_bonus": { "kind": "gold", "amount": 3 }
+    }
+  },
+  "battlePass": {
+    "seasonDays": 30,
+    "tiers": 30,
+    "xpPerTier": 500,
+    "rewards": {
+      "1":  { "free": true, "gold": 2 },
+      "5":  { "free": true, "diamonds": 3 },
+      "10": { "free": true, "gold": 5 },
+      "15": { "free": false, "premium": true, "diamonds": 10 },
+      "20": { "free": true, "gold": 8 },
+      "25": { "free": false, "premium": true, "diamonds": 20 },
+      "30": { "free": false, "premium": true, "diamonds": 50, "skin": "royal" }
+    }
+  }
+}

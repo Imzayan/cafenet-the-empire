@@ -1,62 +1,9 @@
 <script>
 /* ============ فازِ ۴ — فروشگاه و پیشرفت ============
- * provider انتزاعیِ خرید (با Mock برچسب‌دار) + پاکت‌های سکه + بتل‌پسِ فصلی
- * افزودنیِ کامل — بدونِ تغییرِ رفتارِ سیستم‌های قبلی.
+ * بتل‌پسِ فصلی با مسیرِ رایگانِ محلی (همیشه آفلاین کار می‌کند) + همگام‌سازیِ ابریِ اختیاری.
+ * خریدِ درون‌برنامه‌ای به لایهٔ واقعیِ MONEY منتقل شد (p11) — provider آزمایشیِ قبلی
+ * طبق دستورِ مالک به‌طور کامل حذف شد؛ بدونِ پل و تأییدِ سرور هیچ مقداری صادر نمی‌شود.
  */
-const IAP = (function () {
-  let provider = {
-    label: 'MOCK-TEST',
-    /* قراردادِ provider: purchase(sku) → Promise<{ok, grantCoins, ref}>
-     * در استقرارِ واقعی، آداپتورِ بازار/مایکت/گوگل‌پلی با IAP.use(...) اینجا ثبت می‌شود؛
-     * Mockِ پیش‌فرض فقط برای محیطِ تست است و هیچ پرداختِ واقعی انجام نمی‌دهد. */
-    purchase(sku) {
-      return new Promise(res => setTimeout(() => res({ ok: true, sku: sku.id, grantCoins: sku.coins, ref: 'MOCK-' + Date.now() }), 350));
-    },
-    restore() { return Promise.resolve([]); },
-  };
-  return {
-    env() { return provider.label; },
-    use(p) { provider = p; },
-    buy(sku) {
-      return provider.purchase(sku)
-        .then(r => {
-          if (r && r.ok && r.grantCoins > 0) {
-            Save.d.coins += r.grantCoins;
-            persist();
-            Sfx.buy();
-            toast('[' + provider.label + '] ' + sku.name + ' — +' + faNum(r.grantCoins) + ' سکه', 'amber');
-            renderPremium();
-            return { ok: true };
-          }
-          toast('⚠ پرداخت تأیید نشد [' + provider.label + ']', 'red');
-          return { ok: false };
-        })
-        .catch(() => { toast('⚠ خطای پرداخت [' + provider.label + ']', 'red'); return { ok: false }; });
-    },
-  };
-})();
-
-const COIN_SKUS = [
-  { id: 'coins10', name: 'پاکتِ دهِ سکه',    coins: 10, price: '۹۹ هزار تومان' },
-  { id: 'coins25', name: 'پاکتِ بیست‌وپنج',  coins: 25, price: '۲۱۹ هزار تومان' },
-  { id: 'coins60', name: 'صندوقِ شصتِ سکه',  coins: 60, price: '۴۹۹ هزار تومان' },
-];
-
-/* خودآزماییِ برچسب‌دارِ محیطِ خرید — نتیجه با برچسبِ provider اعلام می‌شود */
-function iapSelfTest() {
-  const out = [];
-  out.push(['برچسبِ محیط', IAP.env() === 'MOCK-TEST']);
-  const C0 = Save.d.coins;
-  IAP.buy(COIN_SKUS[0]).then(r => {
-    out.push(['خریدِ mock', r.ok && Save.d.coins === C0 + 10]);
-    out.push(['پاکت‌های سالم', COIN_SKUS.every(s => s.coins > 0)]);
-    const pass = out.every(x => x[1]);
-    toast(pass ? '✓ خودآزماییِ provider: PASS (' + out.map(o => o[0]).join('، ') + ') — [MOCK-TEST]'
-               : '✗ خودآزماییِ provider: FAILED', pass ? 'cyan' : 'red');
-    renderPremium();
-  });
-}
-
 /* ---------- بتل‌پسِ فصلی ---------- */
 const PASS_TIER_XP = 500, PASS_TIERS = 20;
 const PASS_REWARDS = [
@@ -90,7 +37,10 @@ function passAdvance() { /* در پایانِ روز صدا زده می‌شود
     P.season = s; P.xp = 0; P.tier = 0; P.claimed = [];
     toast('🗓 فصلِ ' + faNum(s) + ' بتل‌پس آغاز شد — جدولِ جوایزِ تازه در فروشگاهِ پرمیوم', 'cyan');
   }
-  P.xp += 40 + 4 * (G.dayStats.served || 0);
+  const dx = 40 + 4 * (G.dayStats.served || 0);
+  P.xp += dx;
+  /* فازِ ۶ — همگام‌سازیِ اختیاریِ XP با سرور (بدونِ پل = بدونِ اتصال، بی‌صدا رد می‌شود) */
+  if (typeof MONEY !== 'undefined' && MONEY.isBridge() && MONEY.isServerOk()) MONEY.syncPass(dx);
   const nt = Math.min(PASS_TIERS, Math.floor(P.xp / PASS_TIER_XP));
   if (nt > P.tier) {
     P.tier = nt;
@@ -117,22 +67,13 @@ function claimPass(i) {
   }
   Sfx.buy();
   toast('🏅 تیرِ ' + faNum(i) + ': ' + passRewardTxt(R), 'amber');
+  /* فازِ ۶ — ادعای ابریِ همان تیر (سرور اعتبارِ پرمیوم/تیر را می‌سنجد؛ خطا بی‌صدا) */
+  if (typeof MONEY !== 'undefined' && MONEY.isBridge()) MONEY.claimPassCloud(i);
   persist();
   renderPremium();
 }
 
-/* ---------- رندرِ فروشگاهِ سکه و بتل‌پس ---------- */
-function renderCoinShop() {
-  const el = document.getElementById('prShopBox');
-  if (!el) return;
-  el.innerHTML = '<div class="prTitle">🛒 خریدِ سکه</div>' + COIN_SKUS.map(s =>
-    '<div class="coinRow"><div class="uico">🪙</div><div class="ubody"><div class="uname">' + s.name
-    + '</div><div class="ueff">' + s.price + '</div></div>'
-    + '<button class="ubuy" data-sku="' + s.id + '">+' + faNum(s.coins) + '</button></div>').join('');
-  el.querySelectorAll('button[data-sku]').forEach(b => {
-    b.onclick = () => { Sfx.tickS(); IAP.buy(COIN_SKUS.find(s => s.id === b.dataset.sku)); };
-  });
-}
+/* ---------- رندرِ جدولِ بتل‌پس ---------- */
 function renderPass() {
   const el = document.getElementById('prPassBox');
   if (!el) return;

@@ -1,0 +1,24 @@
+{
+  "name": "cafenet-backend",
+  "version": "1.7.0",
+  "private": true,
+  "description": "Backend امنِ CAFENET: THE EMPIRE — ثبتِ تراکنش، Ledger اتمیک، ضدِ تقلب",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "dev": "tsc -p tsconfig.json && node dist/server.js",
+    "test": "node test/run-tests.mjs"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "embedded-postgres": "^18.7.0-beta.19",
+    "typescript": "^5.7.2"
+  }
+}

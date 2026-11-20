@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cafenet
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set in .env}
+      POSTGRES_DB: cafenet
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cafenet"]
+      interval: 5s
+  app:
+    build: .
+    environment:
+      PORT: 8090
+      DATABASE_URL: postgres://cafenet:${DB_PASSWORD}@db:5432/cafenet
+      JWT_SECRET: ${JWT_SECRET:?set in .env}
+      IAB_PUBLIC_KEY: ${IAB_PUBLIC_KEY:-}
+    ports:
+      - "8090:8090"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  pgdata:

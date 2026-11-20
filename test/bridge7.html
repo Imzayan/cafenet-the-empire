@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- هارنسِ تستِ پل — فقط برای آزمایشِ محلی؛ در نسخهٔ انتشارِ بازی لود نمی‌شود.
+     window.CafNet را قبل از بارگذاریِ بازی شبیه‌سازی می‌کند (نقشِ پلِ Kotlin) -->
+<html lang="fa"><head><meta charset="utf-8"></head><body>
+<iframe id="f" src="../cafnet.html?v=br4" style="width:98vw;height:90vh"></iframe>
+<script>
+const f = document.getElementById('f');
+const calls = [];
+function installStub() {
+  const w = f.contentWindow;
+  w.__calls = calls;
+  w.CafNet = {
+    getPlatformInfo() { return JSON.stringify({ platform: 'android', billingReady: true, adsAvailable: true, serverConfigured: true }); },
+    getProducts(id) { calls.push(['getProducts', id]);
+      w.__cnBridge.cb(id, { ok: true, products: [
+        { sku: 'gold_pack_1', title: 'بسته کوچک سکه', price: '۹٬۹۰۰ تومان', type: 'consumable', desc: '۱۰ سکه' },
+        { sku: 'vip_monthly', title: 'عضویت ماهانه VIP', price: '۸۹٬۰۰۰ تومان', type: 'subscription', desc: 'مزایای کامل' },
+      ] }); },
+    purchaseProduct(sku, id) { calls.push(['purchase', sku, id]);
+      if (sku === 'gold_pack_1') w.__cnBridge.cb(id, { ok: true, grant: { gold: 5 }, wallet: { gold: 5, diamonds: 0 }, txId: 't1' });
+      else w.__cnBridge.cb(id, { ok: false, err: 'failed', msg: 'خرید ناموفق بود' }); },
+    showRewardedAd(pl, id) { calls.push(['ad', pl, id]);
+      w.__cnBridge.cb(id, { ok: false, err: 'no_fill', msg: 'الان تبلیغی آماده نیست — کمی بعد دوباره امتحان کن' }); },
+    getWallet(id) { calls.push(['wallet', id]);
+      w.__cnBridge.cb(id, { ok: false, err: 'network' }); },
+  };
+  // باز اتصالِ پل در MONEY — پس از قرارگیریِ stub
+  setTimeout(() => { try { w.eval("if (typeof MONEY !== "undefined" && MONEY.rebind) MONEY.rebind()"); } catch (e) {} w.dispatchEvent(new Event('cn-stub-ready')); }, 100);
+});
+</script></body></html>
