@@ -5,7 +5,7 @@
 
 /* ================= گیتِ کلی ================= */
 const OVERLAYS = ['modal','shop','quests','summary','weekend','gameover','pause','menu','premium','crown'];
-function anyModalOpen(){ return OVERLAYS.some(id => !$(id).hidden) || !$('storyOv').hidden || !$('storyLog').hidden || !$('crewOv').hidden || !$('wsOv').hidden || !$('onlineOv').hidden; }
+function anyModalOpen(){ return OVERLAYS.some(id => !$(id).hidden) || !$('storyOv').hidden || !$('storyLog').hidden || !$('crewOv').hidden || !$('wsOv').hidden; }
 function hideFade(id){
   const el = $(id);
   if(el.hidden) return;
@@ -617,7 +617,6 @@ function bindUI(){
     if(!$('storyLog').hidden){ Sfx.tickS(); hideFade('storyLog'); return; }
     if(!$('crewOv').hidden){ Sfx.tickS(); hideFade('crewOv'); return; }
     if(!$('wsOv').hidden){ Sfx.tickS(); hideFade('wsOv'); return; }
-    if(!$('onlineOv').hidden){ Sfx.tickS(); hideFade('onlineOv'); return; }
     if(!$('shop').hidden){ Sfx.tickS(); hideFade('shop'); return; }
     if(!$('dash').hidden){ Sfx.tickS(); hideFade('dash'); return; }
     if(G.userPaused && !$('pause').hidden){ G.userPaused = false; hideFade('pause'); return; }
@@ -655,8 +654,6 @@ function bindUI(){
   $('stLogClose').onclick = () => { Sfx.tickS(); hideFade('storyLog'); };
   $('btnWorkshop').onclick = () => { Sfx.tickS(); openWorkshop(); };
   $('wsClose').onclick = () => { Sfx.tickS(); hideFade('wsOv'); };
-  $('btnOnline').onclick = () => { Sfx.tickS(); $('onlAddr').textContent = (typeof ONL !== 'undefined') ? ONL.api.replace(/^https?:\/\//, '') : 'localhost'; openOnline(); };
-  $('onlClose').onclick = () => { Sfx.tickS(); hideFade('onlineOv'); };
   $('crewClose').onclick = () => { Sfx.tickS(); hideFade('crewOv'); };
   $('sumNext').onclick = () => { Sfx.tickS(); nextDay(); };
   $('wkPay').onclick = () => { Sfx.tickS(); payRent(); };

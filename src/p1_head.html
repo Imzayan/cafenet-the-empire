@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0a0c10">
 <script>
+window.__BOOT_ALIVE = true;
+window.onerror = function(msg, ln) {
+  try {
+    var e = document.getElementById('bootErr');
+    if (!e) {
+      e = document.createElement('div');
+      e.id = 'bootErr';
+      e.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#4a0d14;color:#ffd9dd;font:13px monospace,sans-serif;padding:8px 12px;direction:rtl;white-space:pre-wrap';
+      document.documentElement.appendChild(e);
+    }
+    e.textContent = '⚠ خطا در اجرا: ' + msg + ' (خط ' + ln + ')';
+  } catch (x) {}
+};
 /* فازِ ۶ — PWA: ثبتِ Service-Worker و manifest فقط روی http/https؛ در file:// و WebView بی‌صدا رد می‌شود */
 (function cafenetPwaBoot(){
   try{
@@ -50,10 +63,10 @@ html,body{height:100%;overflow:hidden;background:#040507}
 body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',system-ui,sans-serif;color:var(--ink);overscroll-behavior:none}
 [hidden]{display:none !important}
 #app{position:relative;height:100dvh;max-width:520px;margin:0 auto;overflow:hidden;background:var(--bg)}
-#cv{position:absolute;inset:0;width:100%;height:100%}
+#cv{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%}
 
 /* ---------- لایه‌ی عمومی مودال ---------- */
-.ov{position:absolute;inset:0;z-index:40;background:radial-gradient(120% 100% at 50% 100%, rgba(76,255,158,.05), transparent 55%),
+.ov{position:absolute;top:0;right:0;bottom:0;left:0;z-index:40;background:radial-gradient(120% 100% at 50% 100%, rgba(76,255,158,.05), transparent 55%),
                                               radial-gradient(120% 100% at 50% -20%, rgba(255,95,162,.06), transparent 55%),
                                               rgba(4,5,7,.86);
     display:flex;align-items:center;justify-content:center;padding:16px;
@@ -73,7 +86,7 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
 
 /* ---------- منو ---------- */
 #menu{z-index:50;background:rgba(6,8,10,.66);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
-#menu .aur{position:absolute;inset:-15%;filter:blur(64px);opacity:.55;pointer-events:none}
+#menu .aur{position:absolute;top:-15%;right:-15%;bottom:-15%;left:-15%;filter:blur(64px);opacity:.55;pointer-events:none}
 #menu .aur i{position:absolute;border-radius:50%;animation:drift 16s ease-in-out infinite alternate}
 #menu .aur i:nth-child(1){width:48vw;height:48vw;background:rgba(29,88,62,.8);left:-10%;top:-14%;animation-delay:-3s}
 #menu .aur i:nth-child(2){width:44vw;height:44vw;background:rgba(94,29,70,.75);right:-12%;top:16%;animation-delay:-9s}
@@ -90,9 +103,10 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
 #menu .inner>*:nth-child(6){animation-delay:.62s}
 #menu .inner>*:nth-child(7){animation-delay:.72s}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-.logo{font-size:clamp(44px,15vw,64px);font-weight:900;letter-spacing:1px;line-height:1.3;
+.logo{font-size:44px;font-weight:900;letter-spacing:1px;line-height:1.3;
   animation:neon 3.6s infinite, fadeUp .7s cubic-bezier(.2,.8,.2,1) .08s backwards !important;
   text-shadow:0 0 18px rgba(76,255,158,.65), 0 0 60px rgba(76,255,158,.3), 0 0 120px rgba(255,95,162,.22)}
+@media(min-width:480px){.logo{font-size:64px}}
 @keyframes neon{
   0%,90%,100%{opacity:1;text-shadow:0 0 18px rgba(76,255,158,.65), 0 0 60px rgba(76,255,158,.3), 0 0 120px rgba(255,95,162,.22)}
   91%{opacity:.72;text-shadow:0 0 8px rgba(76,255,158,.4)}
@@ -123,7 +137,7 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
   .statStrip small{font-size:9px;color:#7d8894}
   .crownMini{display:flex;align-items:center;gap:10px;justify-content:center;margin:10px auto 8px;background:rgba(255,215,95,.06);border:1px solid rgba(255,215,95,.2);border-radius:16px;padding:9px 14px;max-width:320px}
   .crownRing{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;flex:none}
-  .crownRing::after{content:'';position:absolute;inset:5px;background:#0d1017;border-radius:50%}
+  .crownRing::after{content:'';position:absolute;top:5px;right:5px;bottom:5px;left:5px;background:#0d1017;border-radius:50%}
   .crownRing span{position:relative;z-index:1;font-size:10px;font-weight:700;color:#ffd75f}
   .crownTxt{text-align:right}
   .crownTxt b{color:#ffd75f;font-size:12px;display:block}
@@ -211,7 +225,7 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
 .stars{text-shadow:0 0 24px rgba(242,193,78,.5)}
 
 /* ---------- بین‌بخش روز ---------- */
-#banner{position:absolute;inset:0;z-index:45;
+#banner{position:absolute;top:0;right:0;bottom:0;left:0;z-index:45;
   background:radial-gradient(100% 80% at 50% 30%, rgba(76,255,158,.07), transparent 60%), #05070a;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
 #bKicker{font-size:11px;letter-spacing:5px;color:var(--dim);animation:fadeUp .5s backwards}
@@ -295,7 +309,6 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
   /* فازِ ۵ — آنلاین */
   .inp{width:100%;box-sizing:border-box;padding:10px 12px;margin:6px 0;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);font:inherit;font-size:14px}
   .inp::placeholder{color:var(--dim)}
-  .onlBox{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px}
   .lbHead,.lbRow{display:flex;gap:8px;align-items:center;padding:6px 4px;font-size:12px}
   .lbHead{color:var(--dim);font-size:11px}
   .lbHead span,.lbRow span{width:22px;text-align:center;flex-shrink:0}
@@ -353,7 +366,6 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
           <button class="nbtn ghost" id="btnStory">📖 داستان</button>
           <button class="nbtn ghost" id="btnPrem">🪙 فروشگاه پرمیوم</button>
           <button class="nbtn ghost" id="btnHow">📜 قوانین در یک نگاه</button>
-          <button class="nbtn ghost" id="btnOnline">☁ آنلاین</button>
         </div>
       </div>
       <div id="menuLegacy" style="font-size:11px;color:var(--amber);margin-top:14px;text-align:center"></div>
@@ -563,16 +575,6 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
       <div class="pt">👥 تیمِ کافه</div>
       <div id="crewList" style="margin:10px 0;max-height:52vh;overflow:auto"></div>
       <div class="mbtns"><button class="nbtn ghost" id="crewClose">بستن</button></div>
-    </div>
-  </div>
-
-  <!-- فازِ ۵ — آنلاینِ اختیاری -->
-  <div id="onlineOv" class="ov" hidden>
-    <div class="card" style="max-width:380px">
-      <div class="pt">☁ آنلاین</div>
-      <div class="ps">اختیاری و جدای از بازیِ آفلاین — حساب، ذخیره‌ی ابری و جدولِ امتیازات. سرور: <span id="onlAddr" style="direction:ltr"></span></div>
-      <div id="onlBody" style="margin:10px 0;max-height:56vh;overflow:auto"></div>
-      <div class="mbtns"><button class="nbtn ghost" id="onlClose">بستن</button></div>
     </div>
   </div>
 

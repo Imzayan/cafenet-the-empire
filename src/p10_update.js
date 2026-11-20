@@ -7,7 +7,7 @@
  * ذخیره‌ی بازی دست‌نخورده می‌ماند (همان origin و همان localStorage).
  */
 const UPD = {
-  VER: '1.2.0',
+  VER: '1.3.0',
   URL: 'https://raw.githubusercontent.com/Imzayan/cafenet-the-empire/main/update.json',
 
   cmp(a, b) {
@@ -32,6 +32,7 @@ const UPD = {
   },
 
   _run(url) {
+    if (typeof fetch !== 'function') return; // WebViewهای خیلی قدیمی
     fetch(url + '?t=' + Date.now())
       .then(r => { if (!r.ok) throw 0; return r.json(); })
       .then(m => {
