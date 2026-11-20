@@ -1,4 +1,24 @@
 <script>
+/* گزارشگرِ خطای روی‌صفحه — هیچ خطایی روی دستگاه بی‌صدا نمی‌ماند */
+window.addEventListener('error', function(ev){
+  try{
+    var m = ev && ev.message ? String(ev.message) : String(ev && ev.error || ev);
+    m = m.slice(0, 90);
+    var now = Date.now();
+    if(window.__errT && now - window.__errT < 2600) return;
+    window.__errT = now;
+    if(typeof toast === 'function') toast('⚠ خطا: ' + m, 'red');
+    else console.error('[cafnet]', m);
+  }catch(e){}
+});
+window.addEventListener('unhandledrejection', function(ev){
+  try{
+    var now = Date.now();
+    if(window.__errT && now - window.__errT < 2600) return;
+    window.__errT = now;
+    if(typeof toast === 'function') toast('⚠ خطای ناهمگام: ' + String(ev && ev.reason || '').slice(0, 70), 'red');
+  }catch(e){}
+});
 'use strict';
 /* ============================================================
    کافه‌نت — هسته: ابزارها · ذخیره · صدا · داده‌ها · وضعیت

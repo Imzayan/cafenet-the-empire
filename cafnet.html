@@ -369,7 +369,7 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
         </div>
       </div>
       <div id="menuLegacy" style="font-size:11px;color:var(--amber);margin-top:14px;text-align:center"></div>
-      <div class="mfoot">آفلاین و لمسی · ذخیره‌ی محلیِ همیشگی · ☁ آنلاینِ اختیاری</div>
+      <div class="mfoot">آفلاین و لمسی · ذخیره‌ی محلیِ همیشگی · بدونِ پرداختِ واقعی</div>
     </div>
   </div>
 
@@ -590,6 +590,26 @@ body{font-family:'Vazirmatn',Tahoma,'Segoe UI','Noto Color Emoji','Apple Color E
   </div>
 </div>
 <script>
+/* گزارشگرِ خطای روی‌صفحه — هیچ خطایی روی دستگاه بی‌صدا نمی‌ماند */
+window.addEventListener('error', function(ev){
+  try{
+    var m = ev && ev.message ? String(ev.message) : String(ev && ev.error || ev);
+    m = m.slice(0, 90);
+    var now = Date.now();
+    if(window.__errT && now - window.__errT < 2600) return;
+    window.__errT = now;
+    if(typeof toast === 'function') toast('⚠ خطا: ' + m, 'red');
+    else console.error('[cafnet]', m);
+  }catch(e){}
+});
+window.addEventListener('unhandledrejection', function(ev){
+  try{
+    var now = Date.now();
+    if(window.__errT && now - window.__errT < 2600) return;
+    window.__errT = now;
+    if(typeof toast === 'function') toast('⚠ خطای ناهمگام: ' + String(ev && ev.reason || '').slice(0, 70), 'red');
+  }catch(e){}
+});
 'use strict';
 /* ============================================================
    کافه‌نت — هسته: ابزارها · ذخیره · صدا · داده‌ها · وضعیت
@@ -1527,6 +1547,7 @@ function newGame(keep){
 }
 function startDay(){
   hideFade('menu');
+  $('menu').hidden = true;   // v1.5.1: پنهانِ فوری — بدونِ اتکا به تایمرِ fade
   $('summary').hidden = true; $('weekend').hidden = true;
   hideFade('gameover'); $('shop').hidden = true; $('quests').hidden = true;
   $('cornerL').hidden = false;
@@ -6044,7 +6065,7 @@ function renderPremium(){
     if(equipped) btn = '<div class="ubuy max">در حال استفاده</div>';
     else if(owned && it.type === 'skin') btn = '<button class="ubuy">استفاده</button>';
     else if(owned && it.type === 'turbo') btn = '<div class="ubuy max">فعال ✓</div>';
-    else btn = '<button class="ubuy"' + (Save.d.coins >= it.cost ? '' : ' disabled') + '>' + faNum(it.cost) + ' 🪙</button>';
+    else btn = '<button class="ubuy' + (Save.d.coins >= it.cost ? '' : ' poor') + '">' + faNum(it.cost) + ' 🪙</button>';
     row.innerHTML =
       '<div class="uico">' + it.icon + '</div>' +
       '<div class="ubody"><div class="uname">' + it.t + '</div>' +
@@ -6059,7 +6080,12 @@ function buyPremium(it){
     Save.d.skin = it.v; applySkin(); persist(); Sfx.tickS(); renderPremium();
     return;
   }
-  if(Save.d.powned.includes(it.id) || Save.d.coins < it.cost) return;
+  if(Save.d.powned.includes(it.id)) return;
+  if(Save.d.coins < it.cost){
+    toast('سکه کافی نداری — با روزِ بی‌نقص، سطح‌ها، دستاوردها یا بتل‌پس جمعش کن', 'red');
+    Sfx.tickS();
+    return;
+  }
   Save.d.coins -= it.cost;
   Save.d.powned.push(it.id);
   if(it.type === 'skin'){ Save.d.skin = it.v; applySkin(); }
@@ -6337,7 +6363,8 @@ function syncSoundBtn(){
 }
 function refreshMenu(){
   const s = Save.d;
-  const hasRun = s.day > 1 || s.week > 1 || s.money > 0;
+  const hasRun = s.day > 1 || s.week > 1 || s.money > 0 || s.money < 0 ||
+    (s.stats && ((s.stats.days || 0) > 0 || (s.stats.served || 0) > 0)) || (s.story && s.story.ch > 0);
   $('btnCont').hidden = !hasRun;
   if(hasRun){
     $('btnCont').textContent = 'ادامه — هفته ' + faNum(s.week) + ' روز ' + faNum(s.day) + ' · ' + fmtK(s.money);
@@ -6545,7 +6572,7 @@ document.addEventListener('DOMContentLoaded', init);
  * ذخیره‌ی بازی دست‌نخورده می‌ماند (همان origin و همان localStorage).
  */
 const UPD = {
-  VER: '1.5.0',
+  VER: '1.5.1',
   URL: 'https://raw.githubusercontent.com/Imzayan/cafenet-the-empire/main/update.json',
 
   cmp(a, b) {

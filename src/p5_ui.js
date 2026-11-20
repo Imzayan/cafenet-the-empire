@@ -266,7 +266,7 @@ function renderPremium(){
     if(equipped) btn = '<div class="ubuy max">در حال استفاده</div>';
     else if(owned && it.type === 'skin') btn = '<button class="ubuy">استفاده</button>';
     else if(owned && it.type === 'turbo') btn = '<div class="ubuy max">فعال ✓</div>';
-    else btn = '<button class="ubuy"' + (Save.d.coins >= it.cost ? '' : ' disabled') + '>' + faNum(it.cost) + ' 🪙</button>';
+    else btn = '<button class="ubuy' + (Save.d.coins >= it.cost ? '' : ' poor') + '">' + faNum(it.cost) + ' 🪙</button>';
     row.innerHTML =
       '<div class="uico">' + it.icon + '</div>' +
       '<div class="ubody"><div class="uname">' + it.t + '</div>' +
@@ -281,7 +281,12 @@ function buyPremium(it){
     Save.d.skin = it.v; applySkin(); persist(); Sfx.tickS(); renderPremium();
     return;
   }
-  if(Save.d.powned.includes(it.id) || Save.d.coins < it.cost) return;
+  if(Save.d.powned.includes(it.id)) return;
+  if(Save.d.coins < it.cost){
+    toast('سکه کافی نداری — با روزِ بی‌نقص، سطح‌ها، دستاوردها یا بتل‌پس جمعش کن', 'red');
+    Sfx.tickS();
+    return;
+  }
   Save.d.coins -= it.cost;
   Save.d.powned.push(it.id);
   if(it.type === 'skin'){ Save.d.skin = it.v; applySkin(); }
@@ -559,7 +564,8 @@ function syncSoundBtn(){
 }
 function refreshMenu(){
   const s = Save.d;
-  const hasRun = s.day > 1 || s.week > 1 || s.money > 0;
+  const hasRun = s.day > 1 || s.week > 1 || s.money > 0 || s.money < 0 ||
+    (s.stats && ((s.stats.days || 0) > 0 || (s.stats.served || 0) > 0)) || (s.story && s.story.ch > 0);
   $('btnCont').hidden = !hasRun;
   if(hasRun){
     $('btnCont').textContent = 'ادامه — هفته ' + faNum(s.week) + ' روز ' + faNum(s.day) + ' · ' + fmtK(s.money);

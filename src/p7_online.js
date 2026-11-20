@@ -45,6 +45,8 @@ function onlStatus() {
 }
 function openOnline() {
   const el = $('onlBody');
+  if (!el || !$('onlineOv')) throw new Error('پنلِ آنلاین یافت نشد — نسخهٔ بازی قدیمی است');
+  const oc = $('onlCoins'); if (oc) oc.textContent = faNum(Save.d.coins || 0) + ' 🪙';
   el.innerHTML = '<div class="ps">' + onlStatus() + '</div>';
   /* حساب */
   const acc = document.createElement('div');

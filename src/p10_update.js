@@ -7,7 +7,7 @@
  * ذخیره‌ی بازی دست‌نخورده می‌ماند (همان origin و همان localStorage).
  */
 const UPD = {
-  VER: '1.5.0',
+  VER: '1.5.1',
   URL: 'https://raw.githubusercontent.com/Imzayan/cafenet-the-empire/main/update.json',
 
   cmp(a, b) {

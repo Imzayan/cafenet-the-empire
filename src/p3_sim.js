@@ -32,6 +32,7 @@ function newGame(keep){
 }
 function startDay(){
   hideFade('menu');
+  $('menu').hidden = true;   // v1.5.1: پنهانِ فوری — بدونِ اتکا به تایمرِ fade
   $('summary').hidden = true; $('weekend').hidden = true;
   hideFade('gameover'); $('shop').hidden = true; $('quests').hidden = true;
   $('cornerL').hidden = false;
