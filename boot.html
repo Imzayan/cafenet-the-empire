@@ -19,7 +19,8 @@ try {
     /* نگهبان: اگر نسخهٔ دانلودشده تا ۴.۵ ثانیه زنده نشد → پاکسازی و برگشت به نسخهٔ داخلی */
     setTimeout(function() {
       try {
-        if (!window.__BOOT_ALIVE) {
+        if (!(window.__BOOT_READY || window.__BOOT_ALIVE)) {
+          var _sp = document.getElementById('s'); if (_sp) _sp.textContent = '☕ بازآوریِ نسخه…';
           localStorage.removeItem('cafnet_bundle');
           localStorage.removeItem('cafnet_bundle_ver');
           location.replace('cafnet.html');

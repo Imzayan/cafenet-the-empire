@@ -242,6 +242,17 @@ const PREMIUM = [
   { id:'skin_mono',   t:'پوسته‌ی مینیمال', d:'سفیدِ تک‌رنگِ خنثی — برای ذوقِ ساده‌نویسی', cost:6, type:'skin', v:'mono', icon:'⚪' },
   { id:'turbo',       t:'توربو اسلایدر', d:'دانلود و گیم ۲۵٪ سریع‌تر — برای همیشه', cost:6, type:'turbo', icon:'⚡' },
 ];
+/* v1.6.0 — پالتِ صحنهٔ هر اسکین: دیوار، کف و تزئین — دیگر اسکین فقط منو را عوض نمی‌کند */
+const SCENE_SKINS = {
+  classic: { wall: '#171e2a', wall2: '#141a26', tileA: '#10141b', tileB: '#13171f', tileC: '#12161f', trim: 'rgba(255,255,255,.06)' },
+  gold:    { wall: '#251e12', wall2: '#1e180f', tileA: '#1a1610', tileB: '#201a12', tileC: '#1c1710', trim: 'rgba(255,215,95,.12)' },
+  violet:  { wall: '#1d1630', wall2: '#181227', tileA: '#151024', tileB: '#191328', tileC: '#171128', trim: 'rgba(192,138,255,.13)' },
+  cyber:   { wall: '#0e1d26', wall2: '#0b1820', tileA: '#0c141b', tileB: '#0f1a22', tileC: '#0d161d', trim: 'rgba(77,255,158,.11)' },
+  forest:  { wall: '#12211a', wall2: '#0f1c16', tileA: '#101a14', tileB: '#13201a', tileC: '#111c16', trim: 'rgba(76,255,158,.10)' },
+  sunset:  { wall: '#26161a', wall2: '#201215', tileA: '#1a1114', tileB: '#1f1417', tileC: '#1c1215', trim: 'rgba(255,157,92,.11)' },
+  mono:    { wall: '#1e2226', wall2: '#191d21', tileA: '#181c20', tileB: '#1c2126', tileC: '#1a1f24', trim: 'rgba(255,255,255,.09)' },
+};
+function sceneSkin(){ return SCENE_SKINS[Save.d.skin] || SCENE_SKINS.classic; }
 function applySkin(){
   try{ document.body.dataset.skin = (Save.d.skin && Save.d.skin !== 'classic') ? Save.d.skin : ''; }catch(e){}
   try{ if(typeof buildBG === 'function') buildBG(); }catch(e){}
@@ -760,7 +771,22 @@ function init(){
   refreshMenu();
   G.slots = cafeCapacity();
   buildAmbient(); // کافه از همان منو زنده است
+  window.__BOOT_READY = true; /* v1.6.0: نگهبانِ boot فقط وقتی UI واقعاً بالا آمد */
   requestAnimationFrame(frame);
 }
 document.addEventListener('DOMContentLoaded', init);
+/* اگر WebView نتواند بومِ دوبعدی بسازد — پنلِ واضح، نه صفحهٔ سیاه */
+(function(){
+  try{
+    var c = document.getElementById('cv');
+    var ok = false;
+    try{ ok = !!(c && c.getContext && c.getContext('2d')); }catch(e){ ok = false; }
+    if(!ok){
+      var d = document.createElement('div');
+      d.setAttribute('style', 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#0a0d12;color:#8fa3b8;font-family:sans-serif;text-align:center;padding:20px');
+      d.innerHTML = '<div> WebView این دستگاه از Canvas پشتیبانی نمی‌کند.<br>تنظیمات اندروید ← WebView را به‌روز کنید و بازی را دوباره باز کنید.</div>';
+      document.body.appendChild(d);
+    }
+  }catch(e){}
+})();
 </script>
