@@ -150,6 +150,8 @@ const ART = {
   },
 
   ring(x, y) { this.fx.push({ n: 'levelup', x, y, t: 0, d: 0.85 }); },
+  zzz(x, y) { if (this.ok) this.fx.push({ n: 'zzz', x, y, t: 0, d: 0.9 }); },
+  note(x, y) { if (this.ok) this.fx.push({ n: 'note', x, y, t: 0, d: 0.8 }); },
   sparkle(x, y) { this.fx.push({ n: 'sparkle', x, y, t: 0, d: 0.6 }); },
   burst(x, y) { this.fx.push({ n: 'burst', x, y, t: 0, d: 0.6 }); },
 

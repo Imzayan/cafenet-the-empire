@@ -1,7 +1,7 @@
 {
- "version": "1.0.0",
+ "version": "1.1.0",
  "game": "CAFENET: THE EMPIRE",
- "note": "همه‌ی دارایی‌ها تولیدِ کدِ (PIL) با پس‌زمینه‌ی شفاف — پالتِ هم‌اهنگ با مراجعِ طراحی",
+ "note": "فازِ ۵ — اورهالِ اسپرایت: سایه‌پردازیِ ۴پله، ریم‌لایت، واکِ ۴فریمیِ واقعی، اکسسوریِ هر نوع + FXِ zzz/note",
  "chars": {
   "dl": {
    "src": "assets/chars/dl.png",
@@ -292,6 +292,16 @@
    "src": "assets/fx/smoke.png",
    "frames": 4,
    "size": 32
+  },
+  "zzz": {
+   "src": "assets/fx/zzz.png",
+   "frames": 3,
+   "size": 20
+  },
+  "note": {
+   "src": "assets/fx/note.png",
+   "frames": 3,
+   "size": 16
   }
  },
  "ui": {

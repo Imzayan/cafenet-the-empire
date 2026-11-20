@@ -1046,6 +1046,7 @@ function drawDesk(i){
   if(s.rebootT > 0){
     drawRing(x, y - 14, 12, 1 - s.rebootT / rebootDur(), hexk('c'), 2.6);
     faText('ری‌استارت…', x, y + 20, 8, hexk('c'), 'center');
+    if(typeof ART !== 'undefined' && ART.ok && ((G.t + i * 0.37) % 1.15) < (G.dt || 1 / 60)) ART.zzz(x + 15, y - 36);
     drawSlider(i, p, s);
     return;
   }
@@ -1067,6 +1068,7 @@ function drawDesk(i){
       ctx.beginPath(); ctx.arc(x + 10, y - 7, 1.6, 0, TAU); ctx.fill();
     }
   } else if(vis === 'chat'){
+    if(typeof ART !== 'undefined' && ART.ok && ((G.t + i * 0.53) % 1.3) < (G.dt || 1 / 60)) ART.note(x + 17, y - 28);
     const ws = [24, 15, 20];
     for(let k = 0; k < 3; k++){
       ctx.fillStyle = 'rgba(89,194,255,' + (0.3 + k * 0.12).toFixed(2) + ')';
