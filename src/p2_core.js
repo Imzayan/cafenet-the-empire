@@ -151,6 +151,7 @@ const Save = {
         this.d.saveVersion = SAVE_VERSION;
       } else this.d = this.defaults();
     }catch(e){ this.d = this.defaults(); }
+    return !!p;
   },
   save(){
     try{

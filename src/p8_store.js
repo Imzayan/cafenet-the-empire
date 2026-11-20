@@ -100,11 +100,13 @@ function passAdvance() { /* در پایانِ روز صدا زده می‌شود
   persist();
 }
 function claimPass(i) {
+  i = clamp(Math.floor(+i) || 1, 1, PASS_TIERS); // فیکسِ QA: تیرِ ۰/ناعدا کرش می‌کرد
   const P = passState();
   if (i > P.tier) { toast('اول این تیر را با XPِ روزها پر کن', 'red'); return; }
   if (P.claimed.includes(i)) return;
-  P.claimed.push(i);
   const R = PASS_REWARDS[i - 1];
+  if (!R) return; // فیکسِ QA: جایزه‌ی تعریف‌نشده — بدونِ کرش
+  P.claimed.push(i);
   if (R.coins) Save.d.coins += R.coins;
   if (R.money) { G.money += R.money; G.dayStats.earned += R.money; }
   if (R.fame) G.fame = clamp(G.fame + R.fame, 0, 100);

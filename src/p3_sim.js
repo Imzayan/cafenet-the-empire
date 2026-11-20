@@ -1100,9 +1100,11 @@ function endDay(){
   checkLT();
   checkCrown();
   G.risk = 0;
+  if(G.money < 0) toast('⚠ موجودیِ منفی شد — با وامِ بانک یا درآمدِ فردا جبران کن', 'red');
   persist();
   G.paused = true;
   showSummary();
+  return true;
 }
 function showSummary(){
   const ds = G.dayStats;

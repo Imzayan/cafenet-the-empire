@@ -11,6 +11,33 @@ const ART = {
   fx: [],   // افکت‌های اسپرایتیِ موقت
 
   load() {
+    /* داراییِ امبدشده (p9b_embed.js) — روی file:// و APK هم کار می‌کند و با آپدیتِ خودکار می‌آید */
+    if (window.__ASSETS_B64) {
+      try {
+        this.meta = JSON.parse(atob(window.__ASSETS_B64.manifest));
+        const jobs = [];
+        const get = (key, rel) => {
+          const b = window.__ASSETS_B64.files[rel];
+          if (!b) return;
+          jobs.push(new Promise(res => {
+            const im = new Image();
+            im.onload = () => { ART.img[key] = im; res(); };
+            im.onerror = () => res();
+            im.src = 'data:image/png;base64,' + b;
+          }));
+        };
+        for (const k in this.meta.chars) get('c_' + k, this.meta.chars[k].src);
+        get('t_floor', this.meta.tiles.floorStages.src);
+        get('t_carpet', this.meta.tiles.carpet.src);
+        get('t_mat', this.meta.tiles.mat.src);
+        for (let i = 0; i < this.meta.tiles.wall.length; i++) get('t_wall' + i, this.meta.tiles.wall[i].src);
+        for (const k in this.meta.fx) get('f_' + k, this.meta.fx[k].src);
+        for (const k in this.meta.ui) get('u_' + k, this.meta.ui[k].src);
+        return Promise.all(jobs).then(() => {
+          ART.ok = !!(ART.img['c_dl'] && ART.img['t_floor'] && ART.img['f_burst']);
+        });
+      } catch (e) { ART.ok = false; }
+    }
     return fetch('assets/manifest.json', { cache: 'no-cache' })
       .then(r => { if (!r.ok) throw 0; return r.json(); })
       .then(m => {
