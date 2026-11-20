@@ -111,7 +111,13 @@ const MONEY = (function () {
     const r = await call('purchaseProduct', [sku]);
     if (r && r.ok) {
       applyGrant(r.grant);
-      if (r.wallet) { st.wallet = { wallet: r.wallet, vip: r.vip || st.wallet?.vip || { active: false }, entitlements: st.wallet?.entitlements || {} }; Save.d.diamonds = Math.max(0, Math.floor(+r.wallet.diamonds) || 0); persist(); }
+      if (r.wallet) {
+        /* سازگاریِ WebViewهای قدیمی: بدونِ optional chaining */
+        var _oldW = st.wallet || {};
+        st.wallet = { wallet: r.wallet, vip: r.vip || _oldW.vip || { active: false }, entitlements: _oldW.entitlements || {} };
+        Save.d.diamonds = Math.max(0, Math.floor(+r.wallet.diamonds) || 0);
+        persist();
+      }
       if (r.removeAds) { st.wallet = st.wallet || { entitlements: {} }; st.wallet.entitlements.removeAds = true; }
       if (r.vip && r.vip.active !== undefined) { st.wallet = st.wallet || {}; st.wallet.vip = r.vip; }
       toast('✅ خرید موفق — ثبتِ امن در حساب', 'green');
