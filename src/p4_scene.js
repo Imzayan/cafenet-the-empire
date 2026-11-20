@@ -242,7 +242,9 @@ function buildBG(){
   const wallTrim = wallLv >= 2 ? 'rgba(255,157,92,.1)' : wallLv >= 1 ? 'rgba(89,194,255,.12)' : 'rgba(255,255,255,.06)';
   g.fillStyle = wallC;
   g.fillRect(0, 48, WORLD_W, 76);
-  g.strokeStyle = 'rgba(0,0,0,.22)'; g.lineWidth = 1;
+  if(typeof ART !== 'undefined' && ART.ok && ART.wall(g, wallLv)){
+    /* دیوارِ تایلی از Tile Set */
+  } else   g.strokeStyle = 'rgba(0,0,0,.22)'; g.lineWidth = 1;
   for(let y = 56; y < 124; y += 9){
     g.beginPath(); g.moveTo(0, y); g.lineTo(WORLD_W, y); g.stroke();
     for(let x = (y % 18 < 9 ? 12 : 24); x < WORLD_W; x += 26){
@@ -482,7 +484,9 @@ function buildBG(){
     ['#1a202b', '#202733', '#1d242f'],
     ['#1f2632', '#262e3c', '#232a37'],
   ][stg];
-  for(let j = 0; j < 14; j++){
+  if(typeof ART !== 'undefined' && ART.ok && ART.floor(g, stg)){
+    /* کفِ تایلی از Tile Set پیکسل‌آرت — هم‌_grid با شبکه‌ی قبلی */
+  } else   for(let j = 0; j < 14; j++){
     const y = 124 + j * 21;
     for(let i = 0; i < Math.ceil(WORLD_W / 36); i++){
       const x = i * 36;
@@ -1236,11 +1240,15 @@ function drawFigure(cx, baseY, o){
 }
 function drawPerson(c){
   if(c.type === 'clean' || c.type === 'tech'){
-    drawFigure(c.x, c.y + 9, {
-      shirt: c.type === 'clean' ? '#4a6b55' : '#3e556b', hair: c.hair, H: 22,
-      skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: 1,
-      walking: true, walkPh: c.bob,
-    });
+    if(typeof ART !== 'undefined' && ART.ok && ART.hasChar(c.type)){
+      ART.blitChar(ctx, c.type, c.dir || 1, c.bob, false, c.x, c.y + 9, 22 * (c.hMul || 1));
+    } else {
+      drawFigure(c.x, c.y + 9, {
+        shirt: c.type === 'clean' ? '#4a6b55' : '#3e556b', hair: c.hair, H: 22,
+        skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: 1,
+        walking: true, walkPh: c.bob,
+      });
+    }
     faText(c.type === 'clean' ? '🧹' : '🔧', c.x + (c.dir > 0 ? 9 : -9), c.y - 6, 8, '#dfe6ec', 'center');
     if(c.bub) drawBubble(c.x, c.y - 12, c.bub.text);
     return;
@@ -1248,17 +1256,24 @@ function drawPerson(c){
   if(c.type === 'cust'){
     if(c.state === 'sit') return; // داخلِ drawDesk کشیده می‌شود
     const K = KINDS[c.kind];
-    const color = K ? rgb(K.color) : '#8a94a0';
-    drawFigure(c.x, c.y + 9, {
-      shirt: c.shirt || color, hair: c.hair, H: 23,
-      skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: c.wMul,
-      walking: true, walkPh: c.bob,
-      pose: c.anim || null, animT: c.animT,
-    });
-    if(c.state === 'angry'){
-      ctx.globalAlpha = 0.7;
-      drawIcon('game', c.x, c.y - 20, 5, '#ff4d5e');
-      ctx.globalAlpha = 1;
+    if(typeof ART !== 'undefined' && ART.ok && ART.hasChar(c.kind) && !c.anim){
+      /* اسپرایتِ پیکسل‌آرتِ راه‌رفتن — fallbackِ کامل به برداری */
+      const moving = c.state === 'walk' || c.state === 'angry' || c.state === 'leave' || c.state === 'consPlay';
+      ART.blitChar(ctx, c.kind, c.dir || 1, c.bob, !moving, c.x, c.y + 9, 23 * (c.hMul || 1));
+      if(c.state === 'angry') ART.uiIcon(ctx, 'angry', c.x, c.y - 20, 10);
+    } else {
+      const color = K ? rgb(K.color) : '#8a94a0';
+      drawFigure(c.x, c.y + 9, {
+        shirt: c.shirt || color, hair: c.hair, H: 23,
+        skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: c.wMul,
+        walking: true, walkPh: c.bob,
+        pose: c.anim || null, animT: c.animT,
+      });
+      if(c.state === 'angry'){
+        ctx.globalAlpha = 0.7;
+        drawIcon('game', c.x, c.y - 20, 5, '#ff4d5e');
+        ctx.globalAlpha = 1;
+      }
     }
   } else {
     const baseY = c.y + 10;
@@ -1552,8 +1567,12 @@ function drawParticles(){
     if(p.delay > 0) continue;
     if(p.type === 'coin'){
       ctx.globalAlpha = clamp(p.life * 1.5, 0, 1);
-      ctx.fillStyle = hexk('g');
-      ctx.beginPath(); ctx.arc(p.x, p.y, 2.8, 0, TAU); ctx.fill();
+      if(typeof ART !== 'undefined' && ART.ok && ART.fxFrame(ctx, 'coin', p.x, p.y, 1 - p.life / 0.8, 0.8)){
+        // اسپرایتِ چرخشِ سکه
+      } else {
+        ctx.fillStyle = hexk('g');
+        ctx.beginPath(); ctx.arc(p.x, p.y, 2.8, 0, TAU); ctx.fill();
+      }
     } else if(p.type === 'steam'){
       ctx.globalAlpha = clamp(p.life * 0.5, 0, 0.5);
       ctx.fillStyle = '#cfd8e0';
@@ -1573,14 +1592,19 @@ function drawParticles(){
       ctx.beginPath(); ctx.arc(p.x, p.y, 8 + (0.5 - p.life) * 26, 0, TAU); ctx.stroke();
     } else if(p.type === 'star'){
       ctx.globalAlpha = clamp(p.life * 1.6, 0, 1);
-      ctx.fillStyle = hexk('a');
-      ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, TAU); ctx.fill();
+      if(typeof ART !== 'undefined' && ART.ok && ART.fxFrame(ctx, 'sparkle', p.x, p.y, 1 - p.life / 0.5, 0.7)){
+        // اسپرایتِ جرقه
+      } else {
+        ctx.fillStyle = hexk('a');
+        ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, TAU); ctx.fill();
+      }
     } else if(p.type === 'heart'){
       ctx.globalAlpha = clamp(p.life * 1.2, 0, 1);
       faText('♥', p.x, p.y, 9, hexk('p'), 'center', true);
     }
     ctx.globalAlpha = 1;
   }
+  if(typeof ART !== 'undefined' && ART.ok) ART.renderFx(ctx, G.dt || 1 / 60);
 }
 function drawFloaters(){
   for(const f of G.floaters){
@@ -1778,6 +1802,7 @@ function drawPanArrows(){
   }
 }
 function render(dt){
+  G.dt = dt || 1 / 60;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, cv.width, cv.height);
   if(G.scene === 'menu'){

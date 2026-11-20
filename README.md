@@ -62,6 +62,10 @@ node server.js        # پیش‌فرض پورتِ 8088 — PORT=9000 node serve
 سپس بازی از `http://localhost:8088` (همان‌مبدأ) یا فایلِ `cafnet.html` (مبدأِ file:// → localhost:8088). بدونِ سرور هم بازیِ آفلاینِ کامل کار می‌کند. برای استقرارِ عمومی: HTTPS با reverse-proxy و تعویضِ مبدأهای مجاز.
 
 
+## 🎨 دارایی‌های پیکسل‌آرت
+
+بازی با بسته‌ی دارایی‌های واقعی (اسپرایتِ راه‌رفتن، Tile Set، افکت‌ها) ارتقا یافته — روی **هاستِ http** خودکار فعال می‌شود؛ روی file:// به ترسیمِ برداری برمی‌گردد. فهرستِ کامل: [docs/ASSETS.md](docs/ASSETS.md).
+
 ## 📲 دانلودِ APK (اندروید ۵+)
 
 **[⬇ دانلودِ مستقیم — cafnet-empire-v1.0.0.apk](https://github.com/Imzayan/cafenet-the-empire/releases/download/v1.0.0/cafnet-empire-v1.0.0.apk)** (~۲۳۳KB، امضاشده v1+v2+v3)

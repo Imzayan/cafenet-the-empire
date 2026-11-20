@@ -1279,6 +1279,147 @@ function persist(){
 G.runStats = Save.d.stats;
 </script>
 <script>
+/* ============ بسته‌ی دارایی‌های پیکسل‌آرت — لودر و ترسیمِ افزودنی (فازِ Asset) ============
+ * همه‌ی مسیرها با fallbackِ برداریِ کامل: اگر دارایی‌ها بارگذاری نشوند (مثلاً file:// یا APK)،
+ * بازی دقیقاً مثل قبل با ترسیمِ برداری کار می‌کند — صفر خطا، صفر تغییرِ رفتار.
+ */
+const ART = {
+  meta: null,
+  img: {},
+  ok: false,
+  _patFloor: {}, _patWall: {},
+  fx: [],   // افکت‌های اسپرایتیِ موقت
+
+  load() {
+    return fetch('assets/manifest.json', { cache: 'no-cache' })
+      .then(r => { if (!r.ok) throw 0; return r.json(); })
+      .then(m => {
+        ART.meta = m;
+        const jobs = [];
+        const add = (key, src) => jobs.push(new Promise(res => {
+          const im = new Image();
+          im.onload = () => { ART.img[key] = im; res(); };
+          im.onerror = () => res(); // نبودِ فایل → همان کلید موجود نیست → fallback
+          im.src = src;
+        }));
+        for (const k in m.chars) add('c_' + k, m.chars[k].src);
+        add('t_floor', m.tiles.floorStages.src);
+        add('t_carpet', m.tiles.carpet.src);
+        add('t_mat', m.tiles.mat.src);
+        for (let i = 0; i < m.tiles.wall.length; i++) add('t_wall' + i, m.tiles.wall[i].src);
+        for (const k in m.fx) add('f_' + k, m.fx[k].src);
+        for (const k in m.ui) add('u_' + k, m.ui[k].src);
+        return Promise.all(jobs);
+      })
+      .then(() => {
+        ART.ok = !!(ART.img['c_dl'] && ART.img['t_floor'] && ART.img['f_burst']);
+        if (ART.ok && typeof toast === 'function') toast('🎨 دارایی‌های پیکسل‌آرت فعال شد — ' + Object.keys(ART.meta.chars).length + ' کاراکتر', 'cyan');
+      })
+      .catch(() => { ART.ok = false; });
+  },
+
+  hasChar(k) { return !!this.img['c_' + k]; },
+
+  /* کاراکترِ راه‌رونده — فریم از فازِ bob؛ standing → idle روبه‌رو؛ dir منفی → آینه */
+  blitChar(g, k, dir, bob, standing, x, baseY, H) {
+    const im = this.img['c_' + k];
+    if (!im) return false;
+    const M = this.meta.chars[k], FW = M.fw, FH = M.fh;
+    const row = standing ? 0 : 2;
+    const frame = standing ? 0 : 1 + (Math.floor(bob * 0.2) % 4);
+    const w = H * FW / FH, h = H;
+    g.save();
+    g.imageSmoothingEnabled = false;
+    if (dir < 0) { g.translate(x, 0); g.scale(-1, 1); g.translate(-x, 0); }
+    g.drawImage(im, frame * FW, row * FH, FW, FH, x - w / 2, baseY - h, w, h);
+    g.restore();
+    return true;
+  },
+
+  /* الگویِ کف — تایلِ ۳۶×۲۱ دقیقاً هم‌_grid با شبکه‌ی برداری؛ هر مرحله یک ستون */
+  floor(g, stg) {
+    const im = this.img['t_floor'];
+    if (!im) return false;
+    let pat = this._patFloor[stg];
+    if (!pat) {
+      const c = document.createElement('canvas');
+      c.width = this.meta.tiles.floorStages.tw; c.height = this.meta.tiles.floorStages.th;
+      const cc = c.getContext('2d');
+      cc.imageSmoothingEnabled = false;
+      cc.drawImage(im, stg * c.width, 0, c.width, c.height, 0, 0, c.width, c.height);
+      pat = g.createPattern(c, 'repeat');
+      this._patFloor[stg] = pat;
+    }
+    g.save();
+    g.translate(0, 124); g.fillStyle = pat;
+    g.fillRect(0, 0, 820, 640 - 124);
+    g.restore();
+    return true;
+  },
+
+  /* دیوار — سه سطحِ ارتقا؛ تایلِ ۳۶×۷۶ */
+  wall(g, lv) {
+    const im = this.img['t_wall' + clamp(lv, 0, 2)];
+    if (!im) return false;
+    let pat = this._patWall[lv];
+    if (!pat) {
+      const c = document.createElement('canvas');
+      c.width = 36; c.height = 76;
+      const cc = c.getContext('2d');
+      cc.imageSmoothingEnabled = false;
+      cc.drawImage(im, 0, 0, 36, 76);
+      pat = g.createPattern(c, 'repeat');
+      this._patWall[lv] = pat;
+    }
+    g.save();
+    g.translate(0, 48); g.fillStyle = pat;
+    g.fillRect(0, 0, 820, 76);
+    g.restore();
+    return true;
+  },
+
+  /* فریمِ افکت — p: پیشرفتِ ۰..۱ */
+  fxFrame(g, name, x, y, p, scale) {
+    const im = this.img['f_' + name];
+    if (!im || p < 0 || p > 1) return false;
+    const M = this.meta.fx[name], n = M.frames, s = M.size;
+    const i = Math.min(n - 1, Math.floor(p * n));
+    const sz = s * (scale || 1);
+    g.save();
+    g.imageSmoothingEnabled = false;
+    g.drawImage(im, i * s, 0, s, s, x - sz / 2, y - sz / 2, sz, sz);
+    g.restore();
+    return true;
+  },
+
+  uiIcon(g, name, x, y, size) {
+    const im = this.img['u_' + name];
+    if (!im) return false;
+    g.save();
+    g.imageSmoothingEnabled = false;
+    g.drawImage(im, x - size / 2, y - size / 2, size, size);
+    g.restore();
+    return true;
+  },
+
+  ring(x, y) { this.fx.push({ n: 'levelup', x, y, t: 0, d: 0.85 }); },
+  sparkle(x, y) { this.fx.push({ n: 'sparkle', x, y, t: 0, d: 0.6 }); },
+  burst(x, y) { this.fx.push({ n: 'burst', x, y, t: 0, d: 0.6 }); },
+
+  renderFx(g, dt) {
+    if (!this.ok) return;
+    for (let i = this.fx.length - 1; i >= 0; i--) {
+      const f = this.fx[i];
+      f.t += dt;
+      const p = f.t / f.d;
+      if (p >= 1) { this.fx.splice(i, 1); continue; }
+      this.fxFrame(g, f.n, f.x, f.y, p);
+    }
+  },
+};
+window.addEventListener('load', () => { try { ART.load(); } catch (e) { ART.ok = false; } });
+</script>
+<script>
 /* ============================================================
    کافه‌نت — شبیه‌سازی: مردم · میزها · چای · رویدادها · دوراهی‌ها
    ماموریت · دستاورد · سطح · روز/هفته · شکست و میراث
@@ -1601,6 +1742,7 @@ function walkUpdate(c, dt){
   if(d <= step){ c.x = t.x; c.y = t.y; c.pathI++; return c.pathI >= c.path.length; }
   c.x += dx / d * step; c.y += dy / d * step;
   c.bob += dt * 10;
+  if(typeof ART !== 'undefined' && ART.ok && Math.random() < dt * 0.12) ART.sparkle(c.x + rnd(-6, 6), c.y - rnd(4, 16)); // جرقه‌ی ظریفِ راه‌رفتن
   c.stepT -= dt;
   if(c.stepT <= 0){ dust(c.x + rnd(-2, 2), c.y + 12); c.stepT = 0.18; }
   return false;
@@ -2124,6 +2266,7 @@ function gainXP(n){
     toast('⬆ سطح ' + faNum(G.level) + ' — ' + titleFor(G.level));
     addCoins(1, 'سطحِ تازه');
     Sfx.levelup();
+    if(typeof ART !== 'undefined' && ART.ok) ART.ring(WORLD_W / 2, VH / 2 - 40);
   }
   if(G.level >= 10) G.xp = Math.min(G.xp, xpNext(10));
   Save.d._level = G.level;
@@ -3014,7 +3157,9 @@ function buildBG(){
   const wallTrim = wallLv >= 2 ? 'rgba(255,157,92,.1)' : wallLv >= 1 ? 'rgba(89,194,255,.12)' : 'rgba(255,255,255,.06)';
   g.fillStyle = wallC;
   g.fillRect(0, 48, WORLD_W, 76);
-  g.strokeStyle = 'rgba(0,0,0,.22)'; g.lineWidth = 1;
+  if(typeof ART !== 'undefined' && ART.ok && ART.wall(g, wallLv)){
+    /* دیوارِ تایلی از Tile Set */
+  } else   g.strokeStyle = 'rgba(0,0,0,.22)'; g.lineWidth = 1;
   for(let y = 56; y < 124; y += 9){
     g.beginPath(); g.moveTo(0, y); g.lineTo(WORLD_W, y); g.stroke();
     for(let x = (y % 18 < 9 ? 12 : 24); x < WORLD_W; x += 26){
@@ -3254,7 +3399,9 @@ function buildBG(){
     ['#1a202b', '#202733', '#1d242f'],
     ['#1f2632', '#262e3c', '#232a37'],
   ][stg];
-  for(let j = 0; j < 14; j++){
+  if(typeof ART !== 'undefined' && ART.ok && ART.floor(g, stg)){
+    /* کفِ تایلی از Tile Set پیکسل‌آرت — هم‌_grid با شبکه‌ی قبلی */
+  } else   for(let j = 0; j < 14; j++){
     const y = 124 + j * 21;
     for(let i = 0; i < Math.ceil(WORLD_W / 36); i++){
       const x = i * 36;
@@ -4008,11 +4155,15 @@ function drawFigure(cx, baseY, o){
 }
 function drawPerson(c){
   if(c.type === 'clean' || c.type === 'tech'){
-    drawFigure(c.x, c.y + 9, {
-      shirt: c.type === 'clean' ? '#4a6b55' : '#3e556b', hair: c.hair, H: 22,
-      skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: 1,
-      walking: true, walkPh: c.bob,
-    });
+    if(typeof ART !== 'undefined' && ART.ok && ART.hasChar(c.type)){
+      ART.blitChar(ctx, c.type, c.dir || 1, c.bob, false, c.x, c.y + 9, 22 * (c.hMul || 1));
+    } else {
+      drawFigure(c.x, c.y + 9, {
+        shirt: c.type === 'clean' ? '#4a6b55' : '#3e556b', hair: c.hair, H: 22,
+        skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: 1,
+        walking: true, walkPh: c.bob,
+      });
+    }
     faText(c.type === 'clean' ? '🧹' : '🔧', c.x + (c.dir > 0 ? 9 : -9), c.y - 6, 8, '#dfe6ec', 'center');
     if(c.bub) drawBubble(c.x, c.y - 12, c.bub.text);
     return;
@@ -4020,17 +4171,24 @@ function drawPerson(c){
   if(c.type === 'cust'){
     if(c.state === 'sit') return; // داخلِ drawDesk کشیده می‌شود
     const K = KINDS[c.kind];
-    const color = K ? rgb(K.color) : '#8a94a0';
-    drawFigure(c.x, c.y + 9, {
-      shirt: c.shirt || color, hair: c.hair, H: 23,
-      skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: c.wMul,
-      walking: true, walkPh: c.bob,
-      pose: c.anim || null, animT: c.animT,
-    });
-    if(c.state === 'angry'){
-      ctx.globalAlpha = 0.7;
-      drawIcon('game', c.x, c.y - 20, 5, '#ff4d5e');
-      ctx.globalAlpha = 1;
+    if(typeof ART !== 'undefined' && ART.ok && ART.hasChar(c.kind) && !c.anim){
+      /* اسپرایتِ پیکسل‌آرتِ راه‌رفتن — fallbackِ کامل به برداری */
+      const moving = c.state === 'walk' || c.state === 'angry' || c.state === 'leave' || c.state === 'consPlay';
+      ART.blitChar(ctx, c.kind, c.dir || 1, c.bob, !moving, c.x, c.y + 9, 23 * (c.hMul || 1));
+      if(c.state === 'angry') ART.uiIcon(ctx, 'angry', c.x, c.y - 20, 10);
+    } else {
+      const color = K ? rgb(K.color) : '#8a94a0';
+      drawFigure(c.x, c.y + 9, {
+        shirt: c.shirt || color, hair: c.hair, H: 23,
+        skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: c.wMul,
+        walking: true, walkPh: c.bob,
+        pose: c.anim || null, animT: c.animT,
+      });
+      if(c.state === 'angry'){
+        ctx.globalAlpha = 0.7;
+        drawIcon('game', c.x, c.y - 20, 5, '#ff4d5e');
+        ctx.globalAlpha = 1;
+      }
     }
   } else {
     const baseY = c.y + 10;
@@ -4324,8 +4482,12 @@ function drawParticles(){
     if(p.delay > 0) continue;
     if(p.type === 'coin'){
       ctx.globalAlpha = clamp(p.life * 1.5, 0, 1);
-      ctx.fillStyle = hexk('g');
-      ctx.beginPath(); ctx.arc(p.x, p.y, 2.8, 0, TAU); ctx.fill();
+      if(typeof ART !== 'undefined' && ART.ok && ART.fxFrame(ctx, 'coin', p.x, p.y, 1 - p.life / 0.8, 0.8)){
+        // اسپرایتِ چرخشِ سکه
+      } else {
+        ctx.fillStyle = hexk('g');
+        ctx.beginPath(); ctx.arc(p.x, p.y, 2.8, 0, TAU); ctx.fill();
+      }
     } else if(p.type === 'steam'){
       ctx.globalAlpha = clamp(p.life * 0.5, 0, 0.5);
       ctx.fillStyle = '#cfd8e0';
@@ -4345,14 +4507,19 @@ function drawParticles(){
       ctx.beginPath(); ctx.arc(p.x, p.y, 8 + (0.5 - p.life) * 26, 0, TAU); ctx.stroke();
     } else if(p.type === 'star'){
       ctx.globalAlpha = clamp(p.life * 1.6, 0, 1);
-      ctx.fillStyle = hexk('a');
-      ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, TAU); ctx.fill();
+      if(typeof ART !== 'undefined' && ART.ok && ART.fxFrame(ctx, 'sparkle', p.x, p.y, 1 - p.life / 0.5, 0.7)){
+        // اسپرایتِ جرقه
+      } else {
+        ctx.fillStyle = hexk('a');
+        ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, TAU); ctx.fill();
+      }
     } else if(p.type === 'heart'){
       ctx.globalAlpha = clamp(p.life * 1.2, 0, 1);
       faText('♥', p.x, p.y, 9, hexk('p'), 'center', true);
     }
     ctx.globalAlpha = 1;
   }
+  if(typeof ART !== 'undefined' && ART.ok) ART.renderFx(ctx, G.dt || 1 / 60);
 }
 function drawFloaters(){
   for(const f of G.floaters){
@@ -4550,6 +4717,7 @@ function drawPanArrows(){
   }
 }
 function render(dt){
+  G.dt = dt || 1 / 60;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, cv.width, cv.height);
   if(G.scene === 'menu'){

@@ -68,6 +68,8 @@
 
     invoke-virtual {v1, v2}, Landroid/webkit/WebSettings;->setAllowFileAccess(Z)V
 
+    invoke-virtual {v1, v2}, Landroid/webkit/WebSettings;->setAllowFileAccessFromFileURLs(Z)V
+
     invoke-virtual {v1, v2}, Landroid/webkit/WebSettings;->setAllowContentAccess(Z)V
 
     invoke-virtual {v0, v2}, Landroid/webkit/WebView;->setOverScrollMode(I)V

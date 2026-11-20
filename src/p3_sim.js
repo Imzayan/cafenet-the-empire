@@ -321,6 +321,7 @@ function walkUpdate(c, dt){
   if(d <= step){ c.x = t.x; c.y = t.y; c.pathI++; return c.pathI >= c.path.length; }
   c.x += dx / d * step; c.y += dy / d * step;
   c.bob += dt * 10;
+  if(typeof ART !== 'undefined' && ART.ok && Math.random() < dt * 0.12) ART.sparkle(c.x + rnd(-6, 6), c.y - rnd(4, 16)); // جرقه‌ی ظریفِ راه‌رفتن
   c.stepT -= dt;
   if(c.stepT <= 0){ dust(c.x + rnd(-2, 2), c.y + 12); c.stepT = 0.18; }
   return false;
@@ -844,6 +845,7 @@ function gainXP(n){
     toast('⬆ سطح ' + faNum(G.level) + ' — ' + titleFor(G.level));
     addCoins(1, 'سطحِ تازه');
     Sfx.levelup();
+    if(typeof ART !== 'undefined' && ART.ok) ART.ring(WORLD_W / 2, VH / 2 - 40);
   }
   if(G.level >= 10) G.xp = Math.min(G.xp, xpNext(10));
   Save.d._level = G.level;
