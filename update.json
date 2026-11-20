@@ -1,7 +1,7 @@
 {
-  "version": "1.3.0",
+  "version": "1.4.0",
   "url": "https://raw.githubusercontent.com/Imzayan/cafenet-the-empire/main/cafnet.html",
-  "notes": "حذفِ بخش آنلاین (بازی کاملاً آفلاین) + فیکسِ صفحهٔ سیاه روی WebViewهای قدیمی + سخت‌سازیِ بوت",
+  "notes": "فازِ گرافیکِ پرمیوم: نورِ پویا با سوراخِ نور، سایهٔ نرمِ آدم‌ها، مخروطِ نورِ مانیتورها، غبارِ نور، جشنِ سطحِ جدید — همه با ذراتِ Pool‌شده",
   "minApk": 2,
   "published": "2026-11-20"
 }

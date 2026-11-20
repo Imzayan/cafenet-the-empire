@@ -7,7 +7,7 @@
  * ذخیره‌ی بازی دست‌نخورده می‌ماند (همان origin و همان localStorage).
  */
 const UPD = {
-  VER: '1.3.0',
+  VER: '1.4.0',
   URL: 'https://raw.githubusercontent.com/Imzayan/cafenet-the-empire/main/update.json',
 
   cmp(a, b) {
@@ -45,8 +45,12 @@ const UPD = {
           .then(html => {
             localStorage.removeItem('cafnet_updating');
             if (html.length < 100000 || html.indexOf('</html>') < 0) return;
+            /* سلامتِ محتوا: نسخه‌ی امبدشده در خودِ فایل باید تازه‌تر از نسخه‌ی در حالِ اجرا باشد —
+               جلوگیری از rawِ stale (برچسبِ تازه + کدِ قدیمی = قفلِ ابدی روی نسخه‌ی کهنه) */
+            const mv = (html.match(/VER:\s*'([0-9]+\.[0-9]+\.[0-9]+)'/) || [])[1];
+            if (!mv || this.cmp(mv, this.VER) <= 0) return; // فایلِ ناهماهنگ — دفعه‌ی بعد دوباره تلاش می‌شود
             localStorage.setItem('cafnet_bundle', html);
-            localStorage.setItem('cafnet_bundle_ver', m.version);
+            localStorage.setItem('cafnet_bundle_ver', mv);
             try { toast('✅ به‌روزرسانیِ ' + m.version + ' دانلود شد — دفعه‌ی بعد که باز کنی فعال است', 'green'); } catch (e) {}
           })
           .catch(() => { try { localStorage.removeItem('cafnet_updating'); } catch (e) {} });

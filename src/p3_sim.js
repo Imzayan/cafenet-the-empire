@@ -846,6 +846,7 @@ function gainXP(n){
     addCoins(1, 'سطحِ تازه');
     Sfx.levelup();
     if(typeof ART !== 'undefined' && ART.ok) ART.ring(WORLD_W / 2, VH / 2 - 40);
+    if(window.Gfx) Gfx.levelBurst();
   }
   if(G.level >= 10) G.xp = Math.min(G.xp, xpNext(10));
   Save.d._level = G.level;

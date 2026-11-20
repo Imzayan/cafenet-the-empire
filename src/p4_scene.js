@@ -1743,6 +1743,7 @@ function drawScene(){
   }
   drawPrintStation();
   drawConsoles();
+  if(window.Gfx) Gfx.floorFx();
   for(const pp of G.people) if(pp.type !== 'cust' && pp.x > visL - 10 && pp.x < visR + 10) drawPerson(pp);
   drawQueuePeople();
   for(const pp of G.people) if(pp.type === 'cust' && pp.x > visL - 14 && pp.x < visR + 14) drawPerson(pp);
@@ -1750,6 +1751,7 @@ function drawScene(){
   drawStaff();
   drawParticles();
   drawFloaters();
+  if(window.Gfx) Gfx.lightPass();
   /* تینتِ محیطیِ زمانِ روز — صبحِ طلایی/روزِ روشن/عصرِ گرم/شبِ آبی */
   const dfr = clamp(G.t / DAY_LEN, 0, 1);
   const tint = dfr < 0.22 ? '255,228,190,0.05' : dfr < 0.62 ? '205,228,255,0.035' : dfr < 0.85 ? '255,172,110,0.075' : '70,100,190,0.13';
