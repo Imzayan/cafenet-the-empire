@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#12131a">
+<title>CAFENET: The Empire</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===================== بوم اصلی بازی ===================== -->
+<canvas id="cv"></canvas>
+
+<!-- ===================== صفحهٔ بارگذاری ===================== -->
+<div id="loader">
+  <div class="lbox">
+    <div class="llogo">CAFENET</div>
+    <div class="lsub">THE EMPIRE</div>
+    <div id="lbar"><i></i></div>
+    <div id="lpct">0%</div>
+    <div class="lhint">در حال آماده‌سازی کافه‌نت…</div>
+  </div>
+</div>
+
+<!-- ===================== نوار بالا ===================== -->
+<div id="topbar" class="ui hidden">
+  <div class="chip" id="chipCoin"><img src="assets/ui/coin.png" alt=""><b id="hudCoin">0</b></div>
+  <div class="chip" id="chipGem"><img src="assets/ui/diamond.png" alt=""><b id="hudGem">0</b></div>
+  <div class="chip" id="chipLvl"><img src="assets/ui/star.png" alt=""><b id="hudLvl">1</b></div>
+  <div class="repwrap"><div class="replabel">اعتبار</div><div class="repbar"><i id="hudRep"></i></div></div>
+</div>
+
+<!-- ===================== دکمهٔ نمای کامل ===================== -->
+<button id="fitbtn" class="ui hidden" aria-label="نمای کامل"><img src="assets/ui/arrows_blue.png" alt=""></button>
+
+<!-- ===================== نوار دکمه‌های پایین ===================== -->
+<div id="navbar" class="ui hidden">
+  <button class="navb" id="btnShop"><img src="assets/ui/cart.png" alt=""><span>فروشگاه</span></button>
+  <button class="navb" id="btnMission"><img src="assets/ui/clipboard.png" alt=""><span>ماموریت</span><i class="dot hidden" id="dotMission"></i></button>
+  <button class="navb" id="btnAch"><img src="assets/ui/trophy.png" alt=""><span>افتخارات</span><i class="dot hidden" id="dotAch"></i></button>
+  <button class="navb" id="btnGift"><img src="assets/ui/gift.png" alt=""><span>هدیهٔ روز</span><i class="dot hidden" id="dotGift"></i></button>
+  <button class="navb" id="btnSet"><img src="assets/ui/gear.png" alt=""><span>تنظیمات</span></button>
+</div>
+
+<!-- ===================== پاپ‌آورِ ایستگاه/ملزومات ===================== -->
+<div id="pop" class="hidden"></div>
+
+<!-- ===================== پنل‌ها (bottom sheet) ===================== -->
+<div id="dim" class="hidden"></div>
+<section class="panel" id="pShop">
+  <header><img src="assets/ui/cart.png" alt=""><h2>فروشگاه</h2><button class="x" data-close>✕</button></header>
+  <nav class="tabs" id="shopTabs">
+    <button data-t="up" class="on">ارتقاها</button><button data-t="fac">امکانات</button><button data-t="dec">دکور</button><button data-t="vip">ویژه 💎</button>
+  </nav>
+  <div class="body" id="shopBody"></div>
+</section>
+<section class="panel" id="pMission">
+  <header><img src="assets/ui/clipboard.png" alt=""><h2>ماموریت‌ها</h2><button class="x" data-close>✕</button></header>
+  <div class="body" id="missionBody"></div>
+</section>
+<section class="panel" id="pAch">
+  <header><img src="assets/ui/trophy.png" alt=""><h2>افتخارات</h2><button class="x" data-close>✕</button></header>
+  <div class="body" id="achBody"></div>
+</section>
+<section class="panel" id="pGift">
+  <header><img src="assets/ui/gift.png" alt=""><h2>هدیهٔ روزانه</h2><button class="x" data-close>✕</button></header>
+  <div class="body" id="giftBody"></div>
+</section>
+<section class="panel" id="pSet">
+  <header><img src="assets/ui/gear.png" alt=""><h2>تنظیمات</h2><button class="x" data-close>✕</button></header>
+  <div class="body" id="setBody"></div>
+</section>
+
+<!-- ===================== اعلان‌های کوتاه ===================== -->
+<div id="toasts"></div>
+
+<!-- ===================== مقدمهٔ داستان (فقط بار اول) ===================== -->
+<div id="intro" class="hidden">
+  <div class="ibox">
+    <img src="assets/signs/cafenet_logo.png" alt="CAFENET">
+    <h1>CAFENET: THE EMPIRE</h1>
+    <p>کافه‌نت پدربزرگ با یک پیشخوان، چند سیستم قدیمی و بدهی به توزیع‌کننده به تو رسیده است.
+       از اینجا یک امپراتوری گیمینگ بساز: سیستم‌ها را قوی کن، صندلی‌ها را عوض کن، مشتری‌ها را راضی نگه دار
+       و کافه‌نت را به بزرگ‌ترین زنجیرهٔ شهر برسان. طمع تعرفهٔ بالا، رضایت مشتری را می‌کُشد — مدیریت کن!</p>
+    <button id="btnStart">شروع کار</button>
+  </div>
+</div>
+
+<script src="assets.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
