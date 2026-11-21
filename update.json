@@ -1,7 +1,7 @@
 {
-  "version": "1.16.0",
-  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.16.0/cafnet.html",
-  "notes": "کمپینِ کاملِ پنج‌فصلی: شخصیت‌ها در صحنه (نیکا/کیان/سارا/آرمان + عکسِ فرهاد)، ۳۸ فصل با سه پایان، ۳۵ مأموریتِ داستانی، رابطه‌ها، شخصی‌سازیِ بنیان‌گذار، حالتِ امپراتوری",
+  "version": "1.17.0",
+  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.17.0/cafnet.html",
+  "notes": "پرمیومِ بصری: شخصیت‌های پیکسلیِ هم‌سبکِ دنیا، مشتری‌های واضح، حذفِ چشمکِ نور، شفتِ نورِ روز، UI پرمیوم",
   "minApk": 2,
   "published": "2026-11-21"
 }
