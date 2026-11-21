@@ -8,7 +8,7 @@
 try{
   if(!/^https?:/.test(String(location.protocol)) && window === window.parent){
     var _bv = localStorage.getItem('cafnet_bundle_ver');
-    var _bootVer = '1.15.0';
+    var _bootVer = '1.16.0';
     var _nv = function(v){ v = String(v).split('.'); return [+(v[0]||0), +(v[1]||0), +(v[2]||0)]; };
     if(_bv && _bv !== _bootVer){
       var _a = _nv(_bv), _b = _nv(_bootVer), _newer = false;
@@ -718,7 +718,7 @@ const Save = {
       powerSpike: false,         // برقِ گرانِ امروز
       tourPend: null,            // تورنمنتِ فردا
       ltDone: [], seenTut: false,
-      story: { ch: 0, seen: [], flags: {}, ally: { rival: 0 }, smDone: [], miNot: [], miProg: {} }, // فازِ ۳ — روایت
+      story: { ch: 0, seen: [], flags: {}, ally: { rival: 0 }, smDone: [], miNot: [], miProg: {}, rel: {}, founder: {} }, // فازِ ۳ — روایت
       crew: [],                                                  // فازِ ۳ — تیمِ فردی
       parts: null,               // فازِ ۳-ب — {cpu,gpu,ram,mon} برای هر میز
       pass: null,                // فازِ ۴ — بتل‌پسِ فصلی {season,xp,tier,claimed}
@@ -776,6 +776,8 @@ const Save = {
             smDone: Array.isArray(p.story.smDone) ? p.story.smDone.filter(x => typeof x === 'string').slice(0, 40) : [], /* v1.15.0 */
             miNot: Array.isArray(p.story.miNot) ? p.story.miNot.filter(x => typeof x === 'string').slice(0, 40) : [],
             miProg: (p.story.miProg && typeof p.story.miProg === 'object') ? p.story.miProg : {},
+            rel: (p.story.rel && typeof p.story.rel === 'object') ? p.story.rel : {}, /* v1.16.0 */
+            founder: (p.story.founder && typeof p.story.founder === 'object') ? p.story.founder : {},
           };
         }
         if(Array.isArray(p.crew)) this.d.crew = p.crew.filter(c => c && typeof c.role === 'string' && typeof c.name === 'string').slice(0, 6);
@@ -1124,7 +1126,7 @@ function payMul(){
 }
 function spawnMul(){
   const ad = activeAd();
-  return Math.pow(0.93, lvl('neon')) * (1 + 0.03 * lvl('gsign')) * (1 + 0.03 * lvl('pcTier')) * (ad && ad.spawn ? ad.spawn : 1) * (1 + 0.12 * lvl('sofa'))
+  return Math.pow(0.93, lvl('neon')) * (1 + 0.03 * lvl('gsign')) * (1 + 0.03 * lvl('pcTier')) * (ad && ad.spawn ? ad.spawn : 1) * (1 + 0.12 * lvl('sofa')) * (Save.d.story.flags.endIndependent ? 1.04 : 1) * (Save.d.story.flags.endRevolution ? 1.02 : 1)
     * (typeof rivalPressure === 'function' ? rivalPressure() : 1);
 }
 function progMul(){ return (1 + 0.18 * lvl('adsl')) * (Save.d.turbo ? 1.25 : 1); }
@@ -1433,7 +1435,7 @@ G.runStats = Save.d.stats;
  * همه‌ی مسیرها با fallbackِ برداریِ کامل: اگر دارایی‌ها بارگذاری نشوند (مثلاً file:// یا APK)،
  * بازی دقیقاً مثل قبل با ترسیمِ برداری کار می‌کند — صفر خطا، صفر تغییرِ رفتار.
  */
-/* v1.15.0 — assetهای v3: کاننِ شخصیت‌ها + دکور + صندلی‌ها (امتدادِ __ASSETS_B64 در ART.load) */
+/* v1.16.0 — assetهای v3: کاننِ شخصیت‌ها + دکور + صندلی‌ها (امتدادِ __ASSETS_B64 در ART.load) */
 window.__ASSETS_V3B64 = { files: {
   'p_hero': ['data:image/webp;base64,UklGRsAKAABXRUJQVlA4ILQKAACQKwCdASpRAIQAPpE4l0eloyIhMBjr2LASCWgAwRYBWF5/5t+IF4lJBfRju7evnSdOR9ADplZ9l0B/EpXxx315x382x/8nh4GGrQsTGmeU7639gxAn/dmL3BNG2K7lcJ63v4aeDhgR8CX9dXFuzQ+zs/kLXoGKYvhqOnoZsJ5OrOu8oGQwDh6aHSIZUttRxjL/5UN3HoExbqErjtzl/rF2N4hMPnzUVkbw816dzINaihwOyL1m0sGeuRzqDVTnFnQpCsNYWkPUvL+P8U+wkQLL5OcmXW78fDX3bheSJv77VfQmVlhT4BSE97fqLBFmjsmUA2fDJL2v79nxTkoY3PrbriywZDENP/G2X4B0uuNh3krWS3LcLTOvrCsRLnkcTib0Mr0PGhFk9UdMNLUubnbn0kDNGacOQPFkD82pgORJT7PRRSgL5Z3/lsM7V+cPsAIXGT7WQV253Kf+5dnDWzNVxJBjc8AA/v31tjteHPDnnWaRq0DYne32fhNyt1aDAvV71v+hpp+bv/oH/6TY4c/siC66ckYmDEupLARY0RMUMRrV3WRDFG09CFGpVDl9rAcUckb9WHs/acqrbkuUD1niDR2NV0PIPdFqD6rX6Pe/Ve3ORVyxJyz/yy1qUOMxgKVvFA1wkyjk5Ce81IoIaYOg+G1ogMymmGiSpBrFAB3SqG7I3Oyqt3Am2RsAVB/2WAyKMQxRjbS4g5K4OpQVF1FlQhAVOwnztaRvix0d4+NaDxczIL8h5pdgTmKmj0DcAtmUcSo4Y5/6HY8m+Lbn7DpadFP7NJzzZvubjyz1twpzmyL1+d+PnOtPNkzPpKirUY2oIB98U1/7ORVK+bAlj5FkKLwLcMxVPpvKqlIQFV1GUuqx8Iv7HBzAhTTpQPT4vsQzwuI9wv9F4fi0w6qAuhXGp2SWpizwUoxporCMHXf8/L+6fdWDXbJ5J5U0wi0EMAVB8QZExWQl+Sos5AB7UTT7YUpLrYzhwUYLbYycGCBnd59BZzkAo9H4wBljI28l+QhGXq8w2GQu2c+bm3WRpo26g8IuGBl3walacPDFBy1OlOD4GUITIQPglhPPEUrVAvwL5wMAadxTvViXenjp91y9NSZq2Fd6uh4pjiQh/tgMrmwFUviCBdCvCWzkmtngSVQUqCYrvz1Tua5W+1l3ZqvVt5FJL/5m18+35CyJd3sq+qdbz8+JwFd5IZd5bk8ImT/Hye+o651pxzgm5z358Jplgc/lGAcVQGQllhuPwc3k1p8YPhZ+Ik5bSxcoT5e1+BqXKvANpTN3CvjoUxcuTrAmxQM2X2zLkP3pUNI6O+nBM/mFc9mgXK3w6zpPW3IC8tAoi/0ve6uwLuGzW17UjwTHgbuVGh8RFYfUF3wpeCZ1W0KO8yKVi7fBDvQLtEKn6Ypulz+dR3wEgiiigO/guvURGarcyQgQ0OgTfE3Q8tMsi5I5z8xve0f2/NZ6WIS2SXRCKXNiyx5lHnRqA2Qp1/UnRxj5eIOaZZvtuff2dHP2LKhGdPaURmt/TiYKTbNvc+eCUGe0bD6R17HsDw+5bFSAGZxr6tSAc8IaSK2L6qBhnJjFkpDjgz9gq0TCO1wn71FS0dkI7NNcSZcC5q0ww2+dgftNNVxkl6Ez7L0orOg5oJqrkQFYTUShvCHisBKpldh80TTkpBOClTdjQa+6OqMK2vO3qwKmCliXd+XDbij5A2lv6DmA59k6xQnb0AOGFYvoCQv1+/rg9q6v2ohG1yH1PZu+xxeXMvjueoXDATkzwPrNUeplMHYDdKGBwXV3zw3FhIQFxFxT/F+RJtiweS5VqKPUUeoBB17zsu1zzI0y3U28IUFwECmZVDtqRQYs135wRa9NnYIEUZnKA8C1egGrj4GD1029HacINte352u1XjPReluqkbhngVC9PNEVZ9H1oBYLuHXfExoBLhaU2DLvz45KaRnUZoq1N36h+Zivl990WYCOrsS0C2DSF1yeT+s2UulN+QPMdIQgsnZPMIosmUK3klHijp3Pgpwom7WyyYGVr7mISwyy6QIuKCtVtKWiivHAX551vu5eCWfGlnGswxum9snvjrOpmEyMJPL6cL6XwdPXo9y/dM+mqkNP6ax2X8kQscsso+qPLToIQUIB1Xcp2WIM/pgVaELCKGDz3eqd/aPcJe9kEPDVqQUMMUuftUG/ptJVHVOuTrPjHGBNi6DncGqIerUdZxOqcOFDR8FHOy6tudaKh5zDEgswngHL6PrF7y/H2xGr+b6+jpHAIBBHoLnZ1ExDOPnRUZml1OAzuEcOB3YoOlMIsgu30/qE8GLJR/AFk4MLBogoAyq9BMcmtvrxToasVorduAzBBms4hhiMc6eqxrfrZgbfuWjnug/XAet78/BM/rZCeAyrz2Px+tkc244e9+v5EEBQgvwtZnOcq8l2mkG19sKRUY2kG6xOUL3WzOqWJfzZAVbs5zuvD8Kr1XysHlgZbfbGTTkpvMk+K9Ph8RJTuYBrW6l65k9eh2MlYFcGKRrPdrKl8+6v2sWnBz3i5H2SlX/ogwDuRMp9xS14y1YS6jwlLsIv8CUjxX5tnoR9nmR+KJ/lDyJksGyNkXKvloCrhv1110x4BQbwJ7REYbQQ7OMw0aEO5LfNMsKpRYLUTjFrAATuYdcSXtPmBxMeSW6WbTGynhg3OZQeVftngsZYkTTYEht9DPjRSAZUF+APu4dhOTNhQ6Ev57aYw/Vyuth06hTmKquNCoD/r+MhqZKkW+pXAOYRvokVrps+GWz19rSYtdrDOYZf4+1zay5tkLSNx5nK2/AAoVhAV+SsoESRZ2TdhVbWOSTMd1cSMEIZGswEsz328xEYC7g9FCDFF4zCCWCGzsIokerM5GecykwELMnWpSj6c6NjUbEkfRigmwRGKx3cahJCjo9wQ46zE2K8GcOu5B04/1oas6XXLH6V/rq+AEQYsl8opy02GgdFYXMNSpRXIzme2DrpVlnKNBElelDTIWKTlF5AXDxKBOEALnyPP1qw6MdNoQyQMx1UzZuy9rwd0ubfmhUwOL6b9K5D538jC3WZomqGK4FXSmC+oR1126e3qYdSTYLiUYjgPh595ML/GVf3IEPMbV2/21HwsjzTZnK7/N28y16aSqg4mg5dXMwafmS4C02BvehKId2egbP0NbcIhxVCb4Y8/Wz2zde3e+I1i/DFR4ya9Jrddex89L5HlIFSWCaDgWNuxSRcPSl2bWoTioHdbze9QEZTdeRBg7SfyT83EHXVLN3NPbS/j2lzr3zS8w01ciGKapptexQeTdJIxAioc/DVbefMpt1c5f/KimQgqtWA4xmDQE81VSzHYLyCdHGMDczfui4rVNgrBLD9WMpTYThcUYCnzTMOfuzSRYG4HBJjNXqL9GG67RKXa/x5C9qpfVxsrzf9NVoM/UT3XXp4w014WQMo03Wr3fiNsMCJUq0wzoDgR8AZtNuboy5ohqe2Dz/HAgs/JoawVCl7GopwM5dG36pykffAeXWjjTo7Oi28UnaiIPzBCS+b5NKizsYbxh8m488g4ZiTyZCTsxIctBCxaDYPPg/vVcThsSHKiuduv1kv9F2V3w7bYBVXIQ89MKMmEkGPARxz8bi3Xf2UH5/hMaJbQX5BSOaHNsemu9YsUnKBcc23khTxlAAA'],
   'p_farhad': ['data:image/webp;base64,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'],
@@ -1468,9 +1470,14 @@ window.__ASSETS_V3B64 = { files: {
   'x_deco_sofa': ['data:image/webp;base64,UklGRmYDAABXRUJQVlA4WAoAAAAQAAAALgAALAAAQUxQSLQAAAABgNRIkiQp8CaKJDGAhkSiSCkg+KOvmdjjHREToMc1wLRSaw0YYDqg1lyb4/RXxjw2TH+OzxqYDjoamA46Gt5Rxwevr3nu9IC/RV/VYAJ1WWsiL3pNUA0mqNfESjWY3K41wZ4xv7gny1vjIG+pyfWWpBxvKclbSvKWkrylJG/pcpxA67qJ1N1/xjis1lmqdZZqrpxxswecJKnn4JzTnoNzTnvASZJ6wEmSenCU9CJMcW/eNwBWUDggjAIAADALAJ0BKi8ALQA+lUKZSiWjoiGqtVwAsBKJYgCdMoSIb6w8ft++eKZrPgC2TM+/s8YxKcVL1UYj6qTPqGOp4p3JNwHAvnHutSYCuTT7FQ5OBMPEptg2qvRblXtWFHcFaKwAAP7+h9PD/BgBL3bBvIj8a/qVbj1/vfwz74ZGF52WIeZfwfVmVz+tdFP+Gr9cPHP8dnj8dqmmbNWw0zEV0MUFYlQi159bkGipH7ngdHi+v/xbtVuMu+78Z+Q6b0/KLVcB09r7ELWviZdUeB7Fnq7e4fZbFieY6uXusNRQ0x8u5mxmXsMb1uh7PcaUCfKg5W2EG7YJMgVEHvaJzyN7yEsNwjRFZzreni+2yDlZ7vCoT0B2LzEe8MSO7tKsbSkrThD2wlbPHvmJKbmhJFUij2YtwfgDpFC32wyzPwZr9fkO2SYhGJBCk1JMk4Xr3nWH1GhLPV7ojcxqnVkcoMzhOAogA8HXL1HZRWt9EaoDkCIFJfiLVDNLYkYb0K80H2ehn8hyLIKhZfbhWKwUxWMTLRa6ZWJrtts7J93n3it51CaU19fHo/rdr9w1hUAe3ugZ3A8e7f1qeLTXAr+a8LVfTZGxCjWdVDeieb2+6ZIuT9XWVizares5T4htM4kxk3+R/RH3Ku/HWWD0Y54msSjCJO1IZ1aefOzrf56d58a1sci21/ce31iS3kEfebm//Sg/ZPXnkvpWhfYT34/Yf2mbD/feVXV45/5P8NhffHVPoAT2iy3BdfXuu2AGn9gfmVZbrzWEHVK1fD+ShnuJj3S3TIGfcU9L8LEw+QHej7Y7E8EPYBz+nWS+5tK/bI+k1Ui4jfxB7CmsuzgARsVCak8wryAWLNLrIMfNvz6yYAA='],
   'x_deco_bonsai': ['data:image/webp;base64,UklGRpoDAABXRUJQVlA4WAoAAAAQAAAAIgAAMAAAQUxQSLkAAAABcNU2kiUV3kbRJBbQkigULRWEuudM9+juPyImAJtBm4HRKNmqnMiSbcsfGTu33+VlVa5dbpUZC7fVYqviy+V+VbwFrT6rAoiSR0WA8jTg+Z+RJ1Bz6XnxtqZsXJ4WgRnZDICa8IX39Cg+UwekDwDVJn6LUpMqviFKLarAapT2ZAbWo7SjSmyntxONe/hZuZcN1I7Y4MbfIB7gPAFzYge14exI76L1j1AHRGlF7EHQ+iCb0QQkPzCxCQBWUDggugIAABAOAJ0BKiMAMQA+lTiXSCWjIiEtXMyQsBKJbADCs3H3oWk9lrT6o9s1d0G88Vk/oLPW+4GWtwA0pUzXyPfUogMNLWddL2Pd/GETNtxhT0m3C1weZ6oFBSKDzRHdzHUjs/Ekbjc4BXa+WRWxrcBuavCyqbnalSqzkAAA/uvnO85n8YhGnrLY8evqGZV47eTg84VUJK7l7QB8GbCEkEjRW//PxZs2A+u46wqyP1mj9Ae/Q7j8bJHMeaHIOQc+6w+B5JpWomRjnbtvHbgMKQTb4ab/hKl2bSMda62zWQaxG7Sorma5vVFlK5vj2FFYtVhn1a7q6zXY7erUPbEtGYfNu0wpT2oFLeXSXGsJrZiCO3b3y92efJoilSCT5YjVBKHGBvuk/U+Wg6pc2vhlySd8x9qek04Ww0u8/mO5t9YbkOzh8Xk7ehlpMFCDFap6G2HmmXyJvEYSK+BUB8H0rU5dgsQzdJmXoaqliIX6JgB4rOcZKg5Iis0L1j0JIgiv8136yPfJJSE4eozxuOeJp4buUhTcnZdxTt9fI+5T50x6fdSyVzuUwOxSI2JXU1u4t+UykaE/X17z83iYPDW3W7KmcLcX5Zapk75/gwlEf0XfoS5sWD9KOYe3HzTg20Qqd0JTLHhxGNHd5xxYHdix3b8ICukE+Y/OGgfOobqtBXc+Yz3RpbDmzxyTJjliD6899wpfsu1Fa9wfun9sVBnoRwvt6cedrwNkgYXNd5JDwPrW3TqiqbjD/YAGlmhKQQ/9eeE2EFC1z2Tgnng1OmmnMPsjldL6OPpPzwtBv1yfyqvpLXSdelYLkVS5+l6h/Z8FrLJBx/p2C/h6CCCoQ3E9yAneA4y67g6T+8TMdw7yNqiabBxggSst6T/Pn54CDX0KBfQTenJebr1CKL1NteyroFcRRLE8htva6r3gAAAA'],
   'x_deco_wart': ['data:image/webp;base64,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'],
+  'x_npcNika': ['data:image/webp;base64,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'],
+  'x_npcKian': ['data:image/webp;base64,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'],
+  'x_npcSara': ['data:image/webp;base64,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'],
+  'x_npcArman': ['data:image/webp;base64,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'],
   'x_chairV3P': ['data:image/webp;base64,UklGRrQFAABXRUJQVlA4IKgFAADwFwCdASoyAGAAPpE6lkglo6IhMrSeYLASCWwAuzOOiSST7U2242FIB7p9uPzvHpF3kT0AOl//zdA756xLKXd+uWe+W8yNKzNF8jf1j7BXS7VojfMHmsArKXicG244nA6PvUc2rtWqQsmcM+rFQsigGNd457FRYp8k62YwQmNoyuX83JYcfOXQDoiIBFZg2t3/+G0J+D5T4TrKWVLRRP5zUQ0T7ZQ6g9Zv1ufWXeUSN91FT/GT8Hzwfsc5x93s2VzjuY2LWA1gAAD+/nQE7GR0LYNGabwumXBxppWR8VPOpowYXCoEaP7zWDH+uoBfzvyc9RKXg0X4w3Mo/u0rGH1LX3jd6N8B+M0AduKrZLEp1QXa/rg4/j4vs5ha6xVZgSw0XcSooDFum8qThIUr7RQ8ZN92CR5bMClZ9KPt6PrrerEXCbP+jNTIRVZ4z2+v2NAzxh1BbEGG2jqRGtCQ12oDgZXyJK7LRtOwuLI1QbhUbNWgt79nvlTAakNXuYaeNLmKoCX9WZwFG/Tee6ynvDt6Q+BS0cKUucLIMOm4G0OaX42WMr8THHR5Xrj0YRFIbcoG6nedFkPMnCZ6MpAIGd4lqa911CxOq6tJdiLG+4tBurmvgpyMlmL88OeazW9oGNaIsDLWW0D0Jk30TGf4fixrlPsLwcmmvg3NQjlIgrNQ0NKo3ODLTTZXMAX1pKBsUqVVV2kjcOM9qkD+eW29ZAL85Huj1ZIWTCaGYD3m0h/Y0V0pcg/ddR4ROp7kUDKBMwDJ/rdRVE3Flai5Kvpzo0iBImhroHvxswCJtD6YBYRs7lCNq7nGRqkWmHxiBSX8Dvzl4VCLEfHpxcsc36X0h/kiWcbHMKv7cwREKTA2o3jEH6T32N178pvzJ91XW18KxfQDXvcgrPRESjChnrEPxOCO5oMSfK7tWlJ7V5auqi+tGjstu1uVmRnK+L82CZsX8ajXKb9iUlhXBujisxDetDNuA388Sq2Z5yiU+Yd4AB+RE2uR3iutvHmNc5yXcJW/Cmck9f3jdXl2vk+9Q4YKX8Euy9WN3O8BJlm5b83Dmrhx7kIJjjV1tYfw+EB1hwPC/jwXvWJJo2hZ0R9JWQASGYaFXvJlHLupHfeyu7UaQd/Mufk3JzXMIeF/nkQgTieyWq4RXr09urumuIAiL56aMfaiK2hHxhyO9923h/Akk49RYwXsmmkmmPKEhferEpaUsa7UHIi4RsrNrWnlh4xUv6NKno3aH+BfUP3RvFs27Z7M8SpkbDGaKIXs/Hq3xjLJG1EIMLx0U+QdMUwmTTywX6dPmXsOR34jYxDf9ok4gHs388XYpUGJdwTP9a9/7N4C5JAtjwIXYe4YjcoafSzAZNWUeKGv7y51oSdiIN53sobD/lYtWa1hMxGPpE/648OyGI9s/OlCyv/WKk1ZPINb9twH2Wvc3DaHpbczkdNlImb+Pk/pxb2be32iN5ZzZe/XJ7ELesv/EybNq13efcg+uyti88PsB3n+8TBTADR8ZJ4Nb1uY/Sz8Ej25DUzup1ygxCg0taNjDbvNPSm/QXNl0cjLGHcdjs0k64HYogI5ZFzZWuLbewBCy0WrebuGArki6roOoEbXxSl8e4wvpDapWY84Y2dwTuamZQsRToiMmxlCg2qO7mRARPOSkze5/8T4xEIm5+bLcHiq2KPOrK1+2NgSMold0La6HKnWq//4+oLKOAUBSF1N9P1/Fm8bGVRHgI0QGQwBKN/ZgPSJV8PFoxD2Iq2kFRNncUV6OS+6afymrLyUm7R+0u3iWkxuTc+KxlP6vn09Nz7oUB247ZZZwKKexxhs9wNGqaogKDGnKXZG69RGC6v8ccSPKHDu/DvZKymYXWSCKjmmF1a9GPrTwywaiNrqczCkZAd7yoSnOUySQO+x2AzMZK2zFkEPB31ES3wRRcfcAAAAAA=='],
   'x_chairV3R': ['data:image/webp;base64,UklGRqwEAABXRUJQVlA4WAoAAAAQAAAAOQAANwAAQUxQSKgAAAABcBXbbtw8vEIhEgYkEkLhmQfhdXdkdf+KiAnAYqg2UKnq/6VRNtZC91lE3Y4HtP/n5Q3GLZvcjkq7SqohE4CrKYBkEwfUlNO8i5jJLq+ZmazhGu/JXZVUOhaHHgRKNLBexXuB3TgdhUVydGGicpRw2lGhaxZwGo7W8mOUlIbDQyzQQK1PFqDaUmITAEN98NuKK+7Fq8BNT3EjTsfDPrlJSGlYtFRs8TBWUDgg3gMAANARAJ0BKjoAOAA+lT6ZSSWjIiEsGqswsBKJbACdMug7J9J5mNdfzPAxHjhH7bLnY/SxvOPoAdLlMwpWxj5zDne8G9MG0GYqffn1UAa0yHINEevM0WKMUUnZ5rUX+7lIFWqVtzZdsKYRLfDwIAvsXOp+oys7qX6581QZPfQ115RcgJa21q0RgGl7pBB2TAST3tuavt9ttAAA/v6H04wt5pZZNQFnSohUFYsPt4rgE/iVUu2TFq70npEKDKpyTj+5c3G6bUN4kg6y8wa2mtshzvHinsmMKvhsiB17Mkm6vbaGpGjEsi/D2yUnU+B5xfjlIoPu3p/iIAb4IiyLER7hdC9kPwSI+6C1ZQJOHZvGJh75K32cgxsIkEZMDl4/1llOQzGLqmyp0Iykgcumjx5zGk4j5+Wby8BgfAmDq3xuwjsGDniWFD4MqCnRwuf0Bgox2Ua6liFahloJBU7KBQENlEK5he5afPtDL7pUToDNPoE4In1L72OgUO398v//icP/wZv//fWbY0X536LByjtWW5HqXRnMIEtz9GPYfm12UP+YF1Wc9ohGdJmD5CSmeMG6l/N1R1KxPo1Pfevng4FaIovZL5Gj0a4NsrCWvpLgxeD3NxlhKza8n87tm+lfHwnE8w/x8Osa5RVyGpgOX8M9aPn6vS7G/CaLK/myE+6uZljQVNU9UcZc+ZlPvA6TjclRepdGmdIb4RnW0IB5Xy22LZtFKBC0sen235BtzbAtrXwuCwhbDbvuQteWenZJc1mwJZGOHbixNDzLipWi5spWbZBZlxxxuTTXUnVRkyDn6xMsJdOosJ3I4WDRjyNudwnEOZbUZ35zFRlMVz8xYoCidZJ3O57jq2PL+z0W7dWdGwnbeYbmmv9sAhjXXPpg69HtYg15Gv4Ju/Yxvc81a7VE1pkdEpf3ogfvV30KIZqFH8J0tTzE+ebTEY1AHkmm4sR0wks+RQox8vseboce+YVr1rRfegPbsMhr6L+JFI0wpGqhfwLac++H/KHqtJpicrEkhYkBOG87zyEK57/ifrZNv1B9ST0WYMZThhrWEC+I9gGdrGTYtisYdPRJdWdP5t8CvTn39L+f9Pg5JfO/IwPM0MJXT/+puJTi2ON9TzOywhgHLugWwe9/HPhXvmv91X1SdSHVwAMcQWpWG7OMhJ0Kq/CtnUIdkYPKX+yducg7oKWX7NuT7/txPnUC5unnhgWXB0DaSA0f/KsJOzbbdfhE+kJ7+GBNpwlaq8QMn85K2v+AJw//zLwHmqWWNafbeFL8YDAkuChQyy2YcJTiYyMQM7riidm2UoORbaLOeQAAAA=='],
 } };
+
 const ART = {
   meta: null,
   img: {},
@@ -4447,6 +4454,17 @@ function drawNeonSign(){
 }
 /* v1.13.0 — دکورِ دیوار: ساعتِ زندهٔ روز + دو قابِ پوستر (بدونِ چشمک) */
 function drawWallDeco(){
+  /* v1.16.0 — عکسِ قدیمیِ فرهاد و ویکتور */
+  (function(){
+    const pim = (typeof ART !== 'undefined' && ART.ok) ? ART.img['p_farhad'] : null;
+    ctx.fillStyle = 'rgba(255,214,120,.12)';
+    ctx.beginPath(); ctx.arc(185, 90, 21, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#2a2416'; ctx.fillRect(175, 78, 20, 24);
+    ctx.strokeStyle = '#d8b45a'; ctx.lineWidth = 1.4; ctx.strokeRect(175.5, 78.5, 19, 23);
+    if(pim){ ctx.imageSmoothingEnabled = true; const ar = pim.width / pim.height, dh = 20, dw = dh * ar; ctx.drawImage(pim, 185 - dw / 2, 80, dw, dh); }
+    else faText('فرهاد', 185, 91, 7, '#d8b45a', 'center', true);
+  })();
+
   function poster(px, py, pw, ph, col, t){
     ctx.fillStyle = 'rgba(9,12,17,.9)';
     ctx.fillRect(px, py, pw, ph);
@@ -5718,6 +5736,96 @@ function drawZoneNPCs(){
     ctx.drawImage(rb, bx2 - w2 / 2, by2 - 26 + Math.sin(G.t * 3) * 0.8, w2, 26);
   }
 }
+/* ================= v1.16.0 — NPCهای کاننِ درونِ صحنه ================= */
+function applyFounder(){
+  try{
+    const fd = (Save.d.story && Save.d.story.founder) || {};
+    const c = CHARS.self;
+    if(fd.name) c.name = fd.name;
+    if(fd.shirt) c.shirt = fd.shirt;
+    if(fd.style) c.style = fd.style;
+  } catch (eF) {}
+}
+applyFounder();
+const CANON_NPCS = [
+  { id: 'nika', img: 'x_npcNika', x: 112, y: 446, w: 34, patrol: 13,
+    when: () => !!Save.d.story.flags.nikaJoined,
+    lines: ['گزارشِ عملیات: چای در حالِ دم‌شدن، سیستم‌ها پایدار، مشتری‌ها خوش‌حال. مدیریت یعنی همین نظمِ بی‌سروصدا.', 'دفترت را مرتب کردم؛ فاکتورها برچسب خوردند و قرضِ عمو رحیم جدول‌بندی شد. نگرانِ عدد نباش، نگرانِ روند باش.'],
+    warm: 'امروز دلم می‌خواست کنارت بایستم، نه پشتِ میز. این کافه برای من فقط پروژه نیست.',
+    cold: 'اعداد رو به پایین است. اگر برنامه‌ات «صبر» است، من برنامه‌ای برایش ندارم.' },
+  { id: 'kian', img: 'x_npcKian', x: 585, y: 174, w: 36, patrol: 0,
+    when: () => !!(Save.d.story.flags.kianJoined || Save.d.story.flags.kianPassed),
+    lines: ['فنِ شمارهٔ ۳ را عوض کردم — دیگر سیلی لازم نیست! راستی اتاقِ زیرزمین بویِ کاغذِ کهنه می‌گیرد؛ شاید چیزی آن‌پایین باشد…', 'لاگِ همهٔ سیست‌ها را گرفتم. اگر NEXUS روتینگی دارد، من اولین کسی هستم که می‌فهمد.'],
+    warm: 'یک ایدهٔ مجنون برای میزِ قهرمانی دارم… فقط قبلش یک فاضلاب‌نما لازم دارم. قول می‌دهم خفن شود!',
+    cold: 'سخت‌افزار بدونِ اعتماد، فقط آهنِ گران‌قیمت است.' },
+  { id: 'sara', img: 'x_npcSara', x: 636, y: 152, w: 36, patrol: 9,
+    when: () => !!Save.d.story.flags.saraJoined,
+    lines: ['بسکتِ امروز برگزار شد؛ واکنشِ دست‌ها بهتر شده. برای تورنمنتِ بعدی آماده‌ایم.', 'قهرمان از پنجره نمی‌آید؛ از بسکتِ سخت‌گیر می‌آید. تمرینِ فردا ساعتِ ۶ صبح — تیمِ جدید!'],
+    warm: 'با این تیم و این مدیریت، اسمِ کافه‌نت را بالای سکویِ جهانی می‌بریم. قولِ حرفه‌ای.',
+    cold: 'تمرینِ نصفه‌نیمه قهرمان نمی‌سازد؛ فقط خسته می‌کند.' },
+  { id: 'arman', img: 'x_npcArman', x: 370, y: 150, w: 36, patrol: 4,
+    when: () => !!Save.d.story.flags.metArman,
+    lines: ['کافه‌ات را چک کردم. تمیز… ولی تمیزی شانسی نمی‌آورد؛ استراتژی می‌آورد. هنوز یاد نگرفته‌ای.', 'NEXUS به همهٔ ما فشار می‌آورد. تو هم فقط یک بازیگرِ دیگرِ همینِ بازیِ خشن هستی.'],
+    warm: 'شاید بهترین حرکت، روبه‌روشدنِ باهم باشد، نه سرِ هم. پیشنهادِ شراکتِ سرد را جدی بگیر.',
+    cold: 'غرورِ ارزان. در بازارِ آزاد می‌بینیمت.' },
+];
+function drawCanonNPCs(){
+  if((G.scene !== 'day' && G.scene !== 'menu') || G.paused) return;
+  for(const n of CANON_NPCS){
+    if(!n.when()) continue;
+    const im = (typeof ART !== 'undefined' && ART.ok) ? ART.img[n.img] : null;
+    n._px = n.x + Math.sin(G.t * 0.7 + n.x) * (n.patrol || 0);
+    const bob = Math.sin(G.t * 2.1 + n.y) * 1.1;
+    ctx.fillStyle = 'rgba(0,0,0,.32)';
+    ctx.beginPath(); ctx.ellipse(n._px, n.y - 1, n.w * 0.32, 3, 0, 0, TAU); ctx.fill();
+    if(im){
+      const h = 38, w2 = h * im.width / im.height;
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(im, n._px - w2 / 2, n.y - h + bob, w2, h);
+      ctx.imageSmoothingEnabled = false;
+    } else {
+      ctx.fillStyle = '#51637f';
+      rr(n._px - 7, n.y - 30 + bob, 14, 26, 5); ctx.fill();
+    }
+    /* نام‌کِ بالای سر */
+    const ch = CHARS[n.id === 'arman' ? 'arman' : n.id] || {};
+    const nm = ch.name || n.id;
+    ctx.fillStyle = 'rgba(10,14,22,.82)';
+    const tw = nm.length * 7 + 10;
+    rr(n._px - tw / 2, n.y - 52, tw, 12, 5); ctx.fill();
+    faText(nm, n._px, n.y - 43.5, 8, '#9fb6ff', 'center', true);
+  }
+}
+function npcBubble(n, ch){
+  try{
+    if(window.__npcBubEl) window.__npcBubEl.remove();
+    const d = document.createElement('div');
+    d.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);max-width:86vw;width:max-content;background:#141a26;border:1px solid #2a3550;border-radius:12px;padding:10px 14px;z-index:98;font-size:12px;direction:rtl;color:#dfe8ff;box-shadow:0 8px 24px rgba(0,0,0,.5);line-height:1.7';
+    const rl = clamp((Save.d.story.rel && Save.d.story.rel[n.id]) || 0, -3, 3);
+    let line;
+    if(rl >= 2 && n.warm) line = n.warm;
+    else if(rl <= -1 && n.cold) line = n.cold;
+    else { n._i = ((n._i || 0) + 1) % n.lines.length; line = n.lines[n._i]; }
+    d.innerHTML = '<b style="color:#8b5cf6">' + (ch ? ch.name : n.id) + '</b> <span style="color:#8fa0bd;font-size:10px">' + (ch ? ch.role : '') + '</span><br>' + line;
+    document.body.appendChild(d);
+    window.__npcBubEl = d;
+    setTimeout(() => { if(window.__npcBubEl === d){ d.style.transition = 'opacity .4s'; d.style.opacity = '0'; setTimeout(() => d.remove(), 420); if(window.__npcBubEl === d) window.__npcBubEl = null; } }, 4600);
+  } catch (eB) {}
+}
+function tapCanonNPC(wx, sy){
+  if(G.scene !== 'day' || !$('storyOv').hidden) return false;
+  for(const n of CANON_NPCS){
+    if(!n.when()) continue;
+    const px = (n._px === undefined) ? n.x : n._px;
+    if(Math.abs(wx - px) < 20 && sy < n.y + 6 && sy > n.y - 56){
+      Sfx.tickS();
+      npcBubble(n, CHARS[n.id === 'arman' ? 'arman' : n.id]);
+      return true;
+    }
+  }
+  return false;
+}
+
 function drawStaff(){
   if(lvl('staff') < 1) return;
   const x = 40, y = 292 + Math.sin(G.t * 1.6) * 1.2;
@@ -5824,6 +5932,7 @@ function drawScene(){
   drawQueuePeople();
   for(const pp of G.people) if(pp.type === 'cust' && pp.x > visL - 14 && pp.x < visR + 14) drawPerson(pp);
   drawZoneNPCs();
+  drawCanonNPCs(); /* v1.16.0 */
   drawCat();
   drawStaff();
   drawParticles();
@@ -6310,7 +6419,7 @@ const CHARS = {
 const STORY = [
   { t: 'کافه‌ی قدیمی', when: { k: 'start' },
     beats: [
-      { who: 'rahim', t: 'پارسا… کلیدِ کافه سنگینه، نه به‌خاطرِ آهن — به‌خاطرِ خاطره‌ها. همون قفلِ گنده‌ای که پدرت برایش فروخت، هنوز با سوئیچِ خودش باز می‌شود. بیست سال همین‌جا نشستم؛ حالا زانوها دیگر اجازه نمی‌دهند.' },
+      { who: 'rahim', t: 'پارسا… کلیدِ کافه سنگینه، نه به‌خاطرِ آهن — به‌خاطرِ خاطره‌ها. همون قفلِ گنده‌ای که پدربزرگت — فرهاد — برایش فروخت، هنوز با سوئیچِ خودش باز می‌شود. بیست سال همین‌جا نشستم؛ حالا زانوها دیگر اجازه نمی‌دهند.' },
       { who: 'rahim', t: 'راستش را بخواه، بدهی‌اش هم با خودت. سه ماه اجارهِ عقب‌افتاده، و کامپیوترهایی که از جنگِ اسناد هم پیرترند. فنِ یکی‌شان فقط با سیلی راه می‌افتد — یادت باشد، وقتی گرم شد سیلی بزن! ولی این محل، قلبِ محله است. بچه‌ها با اولین حقوق‌شان این‌جا فایتبازی یاد گرفتند.' },
       { who: 'self', t: 'برق را که وصل می‌کنم، مارکِ «کافه‌نت» روی تابلو زیرِ گردِ خاک نفس‌نفس می‌زند. یا باید همین امشب جانِ تازه‌ای به‌اش بدم، یا کلید را پس بدهم و برای همیشه شنیده‌شان کنم که «نشد».' },
     ],
@@ -6479,7 +6588,7 @@ const STORY = [
     },
   },
   /* ================= v1.15.0 — کاننِ فصل‌ها (مادرِ پرامپت) ================= */
-  { t: 'قراردادِ عملیات', when: { k: 'serve', n: 25 },
+  { t: 'قراردادِ عملیات', when: { k: 'serve', n: 12 },
     beats: [
       { who: 'nika', t: 'سلام. نیکا هستم. رزومه‌ام را که نیاوردم چون خودم را به‌جایش فرستادم: سابقهٔ مدیریتِ دو گیم‌نتِ زنجیره‌ای، و یک استعفای شفاهی از شرکتی که فکر می‌کرد مشتری یعنی «ترافیک».' },
       { who: 'nika', t: 'کافه‌ت را از در دیدم — مشتری‌های وفادار، صفِ منظم، چایِ بابا کرم. اما دفترت یک تخته است و سفارش‌های تامین، یادداشتِ دستی. من می‌توانم امپراتوری‌ات را منظم کنم — اگر اجازهٔ عملیات بدهی.' },
@@ -6489,7 +6598,7 @@ const STORY = [
       { t: '«مدیرِ عملیاتِ من شو» — قراردادِ کامل', fx: { m: -250000, f: 4, flag: 'nikaJoined' }, note: 'نیکا عضوِ تیم شد · شهرت +۴' },
       { t: '«نیمه‌وقت شروع کن» — آزمایشِ دوطرفه', fx: { f: 2, flag: 'nikaJoined' }, note: 'نیکا عضوِ تیم شد · شهرت +۲' },
     ] } },
-  { t: 'مهندسِ دمِ دستگاه', when: { k: 'day', n: 3 },
+  { t: 'مهندسِ دمِ دستگاه', when: { k: 'day', n: 2 },
     beats: [
       { who: 'kian', t: 'آن فنِ قطع‌شده را شنیدم از آن‌طرفِ خیابان! صدای «قُر-قُر»ی که با سیلی راه می‌افتد یعنی خازنش نفس می‌کشد، نه موتورش. من کیانم — شبکه و سخت‌افزار را مثل رگِ خودم می‌شناسم.' },
       { who: 'kian', t: 'پیشنهادم ساده است: قراردادِ نگهداریِ ماهانه. من همهٔ سیست‌ها را لاگ می‌گیرم، قبل از قطعی عوض می‌کنم. پولِ تعمیرِ اضطراری دیگر نداری، فقط حقوقِ من.' },
@@ -6509,7 +6618,7 @@ const STORY = [
       { t: 'بسکتِ هفتگی — آکادمیِ کافه‌نت', fx: { f: 3, flag: 'saraJoined' }, note: 'سارا مربیِ کافه شد · شهرت +۳' },
       { t: 'فقط قبلِ تورنمنت‌ها مشاوره', fx: { f: 1, flag: 'saraPassed' }, note: 'همکاریِ سبک' },
     ] } },
-  { t: 'کتِ قرمزِ NEXUS', when: { k: 'fame', n: 55 },
+  { t: 'کتِ قرمزِ NEXUS', when: { k: 'fame', n: 45 },
     beats: [
       { who: 'arman', t: 'آرمان دِهقان، از NEXUS CORP. امپراتوریِ کوچکت را دیدم — تمیز، گرم، بوی چای. تبریک. اما بگذار صادق باشم: مِلکِ تو یک «بایتِ تنهایی» در بازارِ در حالِ ادغام است.' },
       { who: 'arman', t: 'ما شهر را شُردیم؛ سه ماه دیگر شهر را. پیشنهادم روی میز می‌ماند: برندت زیرِ چترِ NEXUS، سودِ دوبرابر، خیالت راحت. یا… هرچه بعدش می‌افتد، گناهش نقدِ ما نیست.' },
@@ -6520,7 +6629,7 @@ const STORY = [
       { t: '«اورژه‌ات را مکتوب بفرست» — مذاکرهٔ سرد', fx: { ally: -1, flag: 'metArman' }, note: 'عقب‌نشینیِ تاکتیکی · رقابت −۱' },
       { t: 'بی‌تفاوت بمان و کارت را کن', fx: { flag: 'metArman' }, note: 'سکوت — پاسخِ خنثی' },
     ] } },
-  { t: 'فلش‌بک: نامهٔ ۲۰۳۰', when: { k: 'day', n: 5 },
+  { t: 'فلش‌بک: نامهٔ ۲۰۳۰', when: { k: 'day', n: 3 },
     beats: [
       { who: 'farhad', t: '«پارسا… اگر این را می‌شنوی یعنی به کافه برگشتی. سال ۲۰۳۰ ویکتور کراون با یک قراردادِ «رشدِ مشترک» آمد؛ امضایش کردم چون تنها بودم. سه ماه بعد نامِ «کافه‌نت» زیرِ برندِ او بود و من یک غریبه در مغازهٔ خودم.' },
       { who: 'farhad', t: '«طلا را نه، پسر؛ حق‌امضا را بفروش. NEXUS فقط اسمِ جدیدِ همان کراون است — آرمان دِهقان فقط نایب‌الملکِ با چهرهٔ خوش است. امپراتوری را با قرضِ دوستانه و نامِ خودت بساز.»' },
@@ -6530,7 +6639,7 @@ const STORY = [
       { t: 'نوار را کامل گوش می‌دهم — رازها در حافظه بماند', fx: { f: 2, flag: 'fbSeen' }, note: 'فلش‌بک ثبت شد · شهرت +۲' },
       { t: '«چشمِ تیزت از پشتِ خاکِ سال‌ها» — رد کردنِ فلش‌بک', fx: { flag: 'fbSkipped' }, note: 'فلش‌بک رد شد — بدونِ اثر' },
     ] } },
-  { t: 'سفیدپوشِ هلدینگِ کراون', when: { k: 'fame', n: 70 },
+  { t: 'سفیدپوشِ هلدینگِ کراون', when: { k: 'fame', n: 60 },
     beats: [
       { who: 'victor', t: 'ویکتور کراون. نامم را نشنیده‌ای چون ما نام‌ها را می‌خریم، نه می‌سازیم. «کافه‌نت» سال ۲۰۳۰ مالِ ما بود یک فصل؛ امروز NEXUS است. من فقط زمینِ بازی را چک می‌کنم — مهره‌های تازه‌نفس را می‌بینم.' },
       { who: 'victor', t: 'دو مسیر داری: رشدِ ارگانیکِ آهسته — که ما در نیمه‌راه می‌خریمش — یا امروز یک اورژه با امضای من. تاریخ ثابت کرده ارز‌ها عوض می‌شوند؛ کراون می‌ماند.' },
@@ -6540,7 +6649,7 @@ const STORY = [
       { t: '«نامِ فرهاد فروش‌نیست» — ردِ قاطع', fx: { ally: 1, f: 3, flag: 'victorLetter' }, note: 'رقابت +۱ · شهرت +۳' },
       { t: 'سکوت — و ادامهٔ مسیر', fx: { flag: 'victorLetter' }, note: 'بدونِ تعهد — دشمنِ گمان‌دار' },
     ] } },
-  { t: 'تولد یک امپراتوری', when: { k: 'fame', n: 80, flags: ['nikaJoined', 'kianJoined'] },
+  { t: 'تولد یک امپراتوری', when: { k: 'fame', n: 72, flags: ['nikaJoined'] },
     beats: [
       { who: 'arman', t: 'تورنمنتِ محلیِ امسال مالِ ما شد — و اسمِ NEXUS CORP روی همان تابلویی درخشید که تو با دستِ خودت رنگ زدی. ناراحت نباش؛ ورودِ ما ناگزیر بود. فقط یک هشدار: بازیِ بعدی، شهری است.' },
       { who: 'nika', t: 'گزارشِ عملیات: میزها ۹۲٪ اشغال، وفاداری در سقف، جریانِ نقدی مثبت. از فردا هر تصمیمِ تو با دادهٔ من و زیرساختِ کیان پشتیبانی می‌شود. ما «کافه‌نت» نیستیم دیگر — یک امپراتوری در حالِ تولد است.' },
@@ -6561,6 +6670,152 @@ const STORY = [
       { t: 'تورنمنتِ جنگنده‌ها — با قهرمانِ خودمان', fx: { f: 6, ally: 1, flag: 'warsStarted' }, note: 'شهرت +۶ · رقابت +۱' },
       { t: 'میزبانیِ آزادِ همه — بی‌طرفِ برند', fx: { f: 3, ally: -1, flag: 'warsStarted' }, note: 'شهرت +۳ · تنش −۱' },
     ] } },
+  /* ================= v1.16.0 — کمپینِ کاملِ پنج‌فصلی (مادرِ پرامپت) ================= */
+  { t: 'پیامِ ضبط‌شدهٔ فرهاد', when: { k: 'serve', n: 6 },
+    beats: [
+      { who: 'rahim', t: 'پارسا، این ضبط‌صوتِ قدیمی را تویِ کشویِ پذیرش پیدا کردم. برچسبش می‌گوید «برایِ نوه‌ام». باطری‌اش را تازه کردم… گوش کن.' },
+      { who: 'farhad', t: 'اگر این پیام را می‌شنوی، یعنی فرصتِ دوباره‌ای برای زنده‌کردنِ رؤیای من پیدا شده است. اینجا فقط یک مغازه نیست؛ اینجا آغازِ یک امپراتوری است.' },
+      { who: 'farhad', t: 'نامش را «کافه‌نت» گذاشتم چون باور داشتم شبکه را می‌شود از یک کافه شروع کرد. سه تا قانون به تو می‌دهم: قولِ مشتری را نشکن، اعتبار را با پول نخر، و هرگز امضا را به کسی که تاج دارد نده.' },
+      { who: 'self', t: 'صدای پدربزرگ از میانِ غبارِ نوار می‌آید — آرام، مطمئن، مثلِ دستورِ یک معمار. عکسِ او و مردی با لبخندِ سرد، هنوز پشتِ قابِ گردوگیر است.' },
+    ],
+    choice: { q: 'با میراثِ فرهاد چه می‌کنی؟', opts: [
+      { t: '«عکسش را بالای پذیرش می‌گذارم» — میراثِ آشکار', fx: { f: 1, flag: 'fhMsg1', rel: { nika: 1 } }, note: 'پرچمِ میراث · شهرت +۱' },
+      { t: '«رؤیایش در کارِ من می‌افتد، نه روی دیوار» — میراثِ عملی', fx: { flag: 'fhMsg1' }, note: 'پرچمِ میراث' },
+    ] } },
+  { t: 'نبردِ قیمت‌ها', when: { k: 'fame', n: 45, flags: ['metArman'] },
+    beats: [
+      { who: 'arman', t: 'از فردا تاکتیکِ قیمتِ NEXUS در محله اجراست: یک ماه رایگان برایِ تازه‌واردها، تخفیفِ دانشجوییِ ۵۰٪. کافه‌ت را با همان سلاحی خفه می‌کنم که خودم آموختم: حسابِ دقیق.' },
+      { who: 'nika', t: 'گزارشِ مالی: با این نرخ‌ها، سودِ ما برایِ سه ماه صفر می‌شود — اما نقدینگیِ ما هم تاوان دارد. جنگِ قیمت را فقط بزرگ‌ترها می‌برند؛ ما باید زمینِ بازی را عوض کنیم.' },
+      { who: 'self', t: 'آرمان می‌جنگد مثلِ کسی که پشتش به دیوار است. شاید او هم گروگانِ یک قراردادِ بزرگ‌تر از خودش باشد.' },
+    ],
+    choice: { q: 'پاسخِ استراتژیک به جنگِ قیمت؟', opts: [
+      { t: '«کیفیت و تجربه — نه تخفیف» — برندِ بالا', fx: { f: 3, flag: 'priceWar', rel: { arman: 1 } }, note: 'شهرت +۳ · رابطه با آرمان +۱' },
+      { t: '«پکیجِ محله‌ای — باشگاهِ مشتریان» — وفاداری', fx: { m: -200000, lg: 2, flag: 'priceWar' }, note: 'وفاداری +۲ · هزینه ۲۰۰ هزار' },
+      { t: '«جنگِ نابودکننده — تا مرگِ سود» — خطرناک', fx: { ally: 1, rel: { arman: -1 }, flag: 'priceWar' }, note: 'تندیِ رقابت +۱ · رابطه −۱' },
+    ] } },
+  { t: 'نمایندهٔ ناشناس', when: { k: 'fame', n: 50, flags: ['metArman'] },
+    beats: [
+      { who: 'arash', t: 'یک مرد با چمدانِ چرمی منتظرت است. کارتِ ویزیتش فقط یک لوگو دارد — تاجِ طلایی رویِ مشکی. اسمی روی کارت نیست؛ فقط شماره‌ای بین‌المللی.' },
+      { who: 'victor', t: 'از طرفِ هلدینگِ کراون. امپراتوریِ کوچکت را می‌خریم — نه چون باارزش است؛ چون حذفش گران‌تر از خریدنش است. فایلِ قیمت روی میز است. پیش از نیمه‌شب منقضی می‌شود.' },
+      { who: 'self', t: 'همان تاجِ رویِ کارت، رویِ سندِ قدیمیِ کافه هم بود — سالِ ۲۰۳۰، کنارِ امضای پدربزرگ که با خودکارِ قرمز خط خورده بود.' },
+    ],
+    choice: { q: 'پاسخ به پیشنهادِ کتبیِ NEXUS؟', opts: [
+      { t: '«فایل را پس بده» — ردِ سرد', fx: { ally: 1, flag: 'nexOffer', rel: { arman: 1 } }, note: 'پیام واضح به NEXUS' },
+      { t: '«مذاکره — فقط گوش می‌دهم» — بازیِ طولانی', fx: { ally: -1, flag: 'nexOffer', rel: { arman: -1 } }, note: 'عقب‌نشینیِ تاکتیکی' },
+    ] } },
+  { t: 'رازِ آرمان', when: { k: 'day', n: 4, flags: ['nexOffer'] },
+    beats: [
+      { who: 'arman', t: 'دیشب تویِ دفترم سند را پیدا کردی، نه؟ پس بشنو: گیم‌لندِ من هم سه ماه است قسطِ وامِ NEXUS را عقب می‌اندازد. اگر یک قسطِ دیگر بپرد، امتیازِ ملک مالِ آنهاست. من هم گروگانم.' },
+      { who: 'nika', t: 'سندِ وامش را لاگ کردم: بهرهٔ ترکیبیِ ۲۲٪ با شرطِ تسریع. این قرارداد برایِ ورشکست‌سازیِ هدفمند نوشته شده — امضای حقوقی‌اش با الگویِ قراردادهایِ کراون یکسان است.' },
+      { who: 'self', t: 'رقیبِ من، خودش اولین قربانیِ همان بازی است که به من هشدار داده بود. دشمنِ امروز، شاید آخرین هم‌سنگِ فردا.' },
+    ],
+    choice: { q: 'با رازِ فشارِ مالیِ آرمان؟', opts: [
+      { t: '«مشاورهٔ مالیِ نیکا را می‌فرستم» — همراهی', fx: { m: -150000, rel: { arman: 2 }, flag: 'armHelped', lg: 1 }, note: 'رابطه +۲ · وفاداری +۱' },
+      { t: '«راز را برایِ معامله نگه می‌دارم» — بهره‌برداری', fx: { m: 300000, rel: { arman: -2 }, flag: 'armExploit' }, note: 'سودِ زود · رابطه −۲' },
+    ] } },
+  { t: 'اتاقِ زیرزمینی', when: { k: 'serve', n: 80, flags: ['priceWar'] },
+    beats: [
+      { who: 'kian', t: 'نقشهٔ برق را که باز کردم، یک مسیرِ فانتوم بود: کابل‌هایی که به هیچ پری نمی‌رسند — به پایین می‌روند! پشتِ قفسهٔ بایگانی یک دریِ فلزیِ جوش‌خورده است… جوشش قدیمی است، مالِ ده سالِ پیش.' },
+      { who: 'kian', t: 'بازش کردم! پله‌های بتنی، بویِ کاغذِ خیس، و در مرکزش: یک سرورِ رَکِ قدیمی با قفلِ رمزی. رویِ درش با ماژیک نوشته: «برایِ کسی که رؤیا را ادامه می‌دهد».' },
+      { who: 'self', t: 'قلبِ تپندهٔ رؤیای فرهاد، همهٔ این سال‌ها زیرِ کفِ کافه می‌زده — بی‌صدا، صبور، منتظر.' },
+    ],
+    choice: { q: 'اولین واکنش به اتاقِ مخفی؟', opts: [
+      { t: '«هیچ‌کس نباید بداند تا امن شود» — محرمانه', fx: { flag: 'secretRoom', rel: { kian: 1 } }, note: 'اتاقِ مخفی کشف شد · رابطه با کیان +۱' },
+      { t: '«به تیم اعلام می‌کنم» — شفافیت', fx: { f: 3, flag: 'secretRoom' }, note: 'شهرت +۳' },
+    ] } },
+  { t: 'سرورِ پدربزرگ', when: { k: 'day', n: 5, flags: ['secretRoom'] },
+    beats: [
+      { who: 'kian', t: 'سرور روشن شد ولی دیسک‌اش نیمه‌مرده است. برایِ بازسازیِ کنترلر و خواندنِ آرشیو، تجهیزِ آزمایشگاهی لازم دارم — دیسکِ سالم، پاورِ خطی، و یک هفته شب‌کاری.' },
+      { who: 'nika', t: 'بودجه‌بندی: خریدِ تجهیز ۴۰۰ هزار. یا مسیرِ ارزان‌تر: قطعاتِ دست‌دوم از حراجی‌ها با ریسکِ از‌دست‌رفتنِ بخشی از داده‌ها.' },
+      { who: 'farhad', t: '«اگر به این اتاق رسیده‌ای، یعنی آن‌ها هنوز حقیقت را پنهان کرده‌اند. من نمی‌توانستم همه‌چیز را به تو بگویم. اما حالا نوبتِ توست.» — ضبطِ دومِ نوار، خودکار با سرور روشن شده بود.' },
+    ],
+    choice: { q: 'بازسازیِ سرورِ آرشیو؟', opts: [
+      { t: 'تجهیزِ آزمایشگاهیِ کامل — بدونِ ریسک', fx: { m: -400000, flag: 'serverUp', rel: { kian: 1 } }, note: 'سرورِ زنده شد · رابطه با کیان +۱' },
+      { t: 'قطعاتِ دست‌دوم — با ریسکِ داده', fx: { f: 1, flag: 'serverUp' }, note: 'سرورِ زنده شد · شهرت +۱' },
+    ] } },
+  { t: 'شریکِ قدیمی', when: { k: 'day', n: 6, flags: ['serverUp'] },
+    beats: [
+      { who: 'farhad', t: '«ویدئو؟ این برایِ جلسهٔ ۲۰۱۵ است. این آقا ویکتور کراون است، شریکِ جوانِ من. با هم نقشهٔ «شبکهٔ مستقلِ گیمینگ» را کشیدیم: کافه‌های کوچک، تیم‌های محلی، و یک شبکهٔ داده که هیچ شرکتِ واحدی نمی‌توانست بخرَدش.»' },
+      { who: 'farhad', t: '«او سرمایه می‌آورد، من فناوری. قرارداد را دو نفرمان امضا کردیم و یک نفر شاهد بود — خودِ آرمانِ جوان، شاگردِ دفترِ وکلایِ کراون.»' },
+      { who: 'self', t: 'رویِ مانیتورِ کهنه، دو مردِ جوان کنارِ هم می‌خندند: فرهاد با پیراهنِ کار، ویکتور با کتِ خاکستری. و یک عکسِ گروهیِ سوم: آرمانِ نوجوان با چتریِ نامرتب.' },
+    ],
+    choice: { q: 'با کشفِ شراکتِ قدیمی؟', opts: [
+      { t: '«اسکنِ قرارداد را به آرشیو می‌برم» — مدرکِ اول', fx: { f: 2, flag: 'oldPartnership' }, note: 'قطعهٔ مدرکِ اول (evd1) ثبت شد' },
+      { t: '«اول کپیِ چندگانه می‌سازم» — احتیاط', fx: { m: -80000, flag: 'oldPartnership', lg: 1 }, note: 'پشتیبانِ امن · قطعهٔ اول ثبت شد' },
+    ] } },
+  { t: 'اولین خیانت', when: { k: 'day', n: 7, flags: ['oldPartnership'] },
+    beats: [
+      { who: 'nika', t: 'پوشهٔ مالیِ سرور را رمزگشایی کردم: قراردادهایِ «سponsership» با باشگاه‌های مستقل که همه به یک نهادِ پوستی وصل بودند — مالکیتش نزدِ کراون. هر قرارداد، یک دامِ تصاحب بود.' },
+      { who: 'kian', t: 'و این یکی — تاریخِ امضاش همان هفته‌ای است که کافه‌نتِ پدربزرگ ورشکست اعلام شد. توالیِ رویدادها جعلی نیست؛ برنامه‌ریزی‌شده است.' },
+      { who: 'self', t: 'خیانت ویکتور یک ضربه نبود؛ یک مکانیزم بود. پدربزرگ تنها نفری نبود که امضایش را به دستِ او داده بود — فقط اولین نفری بود که «نه» گفت.' },
+    ],
+    choice: { q: 'با مدرکِ الگویِ خیانت؟', opts: [
+      { t: '«فهرستِ قربانیان را کامل می‌کنم» — بایگانیِ عدالت', fx: { f: 2, flag: 'evd2', rel: { nika: 1 } }, note: 'قطعهٔ دوم ثبت شد · رابطه با نیکا +۱' },
+      { t: '«فقط برایِ دفاعِ خودم نگه می‌دارم» — محتاطانه', fx: { flag: 'evd2' }, note: 'قطعهٔ دوم ثبت شد' },
+    ] } },
+  { t: 'تصمیمِ آرمان', when: { k: 'day', n: 8, flags: ['armSecret2', 'oldPartnership'] },
+    beats: [
+      { who: 'arman', t: 'سندِ وامم را که دیدی، بازیِ پنهانی تمام شد: من گروگانِ همان قراردادِ شباکراونِ کراون هستم که پدربزرگت را سوزاند. یک قسطِ دیگر عقب بیفتم، امتیازِ ملک مالِ آنهاست.' },
+      { who: 'nika', t: 'گزینه‌ها رویِ میز است: تسویهٔ بخشی از وامش در ازایِ شراکتِ رسمی، یا نگه‌داشتنِ سند به‌عنوانِ اهرمِ فشار. ریسکِ اول: ۵۰۰ هزار. بازدهش: یک متحدِ باتجربه در جنگِ پیشِ رو.' },
+      { who: 'self', t: 'یا دشمنِ شکسته را می‌خری، یا دشمنِ کینه‌ای می‌سازی. و اگر او همان شاگردِ قدیمیِ دفترِ کراون باشد… شاید کلیدِ درهایِ دیگری هم باشد.' },
+    ],
+    choice: { q: 'سرنوشتِ آرمان — و رابطهٔ شما؟', opts: [
+      { t: '«بخشی از وامش را تسویه می‌کنم» — خریدِ متحد', fx: { m: -500000, rel: { arman: 2 }, flag: 'armAlly', ally: -1 }, note: 'آرمان متحد شد · رقابت −۱ · رابطه +۲' },
+      { t: '«سند می‌ماند، فاصله هم» — اهرمِ سرد', fx: { rel: { arman: -1 }, flag: 'armKept' }, note: 'رابطه −۱' },
+      { t: '«سنگرِ مشترک اعلام می‌کنیم» — اگر همراهش کرده بودی', fx: { f: 3, rel: { arman: 1 }, flag: 'armAlly', ally: -1 }, reqFlags: ['armHelped'], note: 'آرمان متحد شد · شهرت +۳' },
+    ] } },
+  { t: 'قطعهٔ گمشده', when: { k: 'serve', n: 160, flags: ['evd2'] },
+    beats: [
+      { who: 'kian', t: 'دیسکِ سوم سرور بازیابی شد ولی یک پوشه خراب است — «KRWN-2029». بخشی از شاخصش روی یک هاردِ قدیمی است که به گیم‌لندِ آرمان فروخته شده بودیم!' },
+      { who: 'arman', t: 'همان هارد؟ سیس‌رومم هنوز نگهش داشته. بگیرش — شرطِ من: هر چه توش است، هر دو بخوانیم. من هم حقِ دانستن دارم؛ اسمِ من هم در همان قراردادهایِ شباکراون بود.' },
+      { who: 'self', t: 'قطعهٔ آخرِ پازل، وسطِ قلمروِ رقیبِ دیروز بود — و او خودش کلید را داد.' },
+    ],
+    choice: { q: 'بازیابیِ قطعهٔ نهایی؟', opts: [
+      { t: '«با آرمان مشترک می‌خوانیم» — اعتمادِ دوطرفه', fx: { f: 2, flag: 'evd3', rel: { arman: 1 } }, note: 'قطعهٔ سوم ثبت شد · رابطه +۱' },
+      { t: '«تک‌نفره می‌خوانم و مهر می‌کنم» — کنترل', fx: { flag: 'evd3' }, note: 'قطعهٔ سوم ثبت شد' },
+    ] } },
+  { t: 'تماسِ شخصی', when: { k: 'day', n: 9, flags: ['evd3'] },
+    beats: [
+      { who: 'victor', t: 'تو نمی‌دانی وارد چه بازی‌ای شده‌ای. پدربزرگت هم فکر می‌کرد می‌تواند قوانین را تغییر دهد.' },
+      { who: 'self', t: 'من برایِ بازی‌کردن طبق قوانینِ تو نیامده‌ام.' },
+      { who: 'victor', t: 'هه. جوابِ مشابهِ فرهاد، حرف‌به‌حرف. شنیده باشی، پسر: آرشیوت هر چه هست، در دادگاهِ واقعی هیچ است. قدرتِ واقعی سهمیه است، شبکه است، سکوتِ بانک‌هاست. به تورنمنتِ جهانی فکر کن — آن‌جا با «نتیجه» صحبت می‌کنیم.' },
+    ],
+    choice: { q: 'پس از تماسِ ویکتور کراون؟', opts: [
+      { t: '«آرشیو را سه‌نسخه‌ای می‌کنم» — استحکام', fx: { m: -120000, ally: 1, flag: 'victorContact', rel: { nika: 1 } }, note: 'رقابت +۱ · رابطه با نیکا +۱' },
+      { t: '«مسیرِ تورنمنت جهانی را باز می‌کنم» — پاسخِ زمینِ بازی', fx: { f: 3, flag: 'victorContact' }, note: 'شهرت +۳' },
+    ] } },
+  { t: 'گسترشِ امپراتوری', when: { k: 'fame', n: 75, flags: ['victorContact'] },
+    beats: [
+      { who: 'nika', t: 'پیشنهادِ گسترش رویِ میز است: شعبهٔ دومِ شهر، بعد مقصدِ فرامنطقه‌ای — تهران، دبی، استانبول، برلین، توکیو. نقشه را من چیدم: هر پرچمِ کوچک، یک امضای مستقل.' },
+      { who: 'sara', t: 'و برایِ هر شعبه، یک تیم. بسکتِ ما شش گیمرِ آماده دارد؛ من مسیرِ قهرمانیِ هر شهر را برایشان می‌چینم. برندِ کافه‌نت باید با نتیجه سفر کند، نه با بنر.' },
+      { who: 'kian', t: 'پلِ داده‌ایِ شعبه‌ها را با معماریِ خودِ سرورِ پدربزرگ می‌سازم — همان شبکه‌ای که ویکتور با آن خیانت کرد، حالا می‌شود ابزارِ استقلال.' },
+    ],
+    choice: { q: 'اولین گامِ گسترشِ جهانی؟', opts: [
+      { t: 'اسپانسرِ مستقل — بدونِ طنابِ کراون', fx: { m: 1000000, f: 5, flag: 'sponsor', rel: { sara: 1 } }, note: 'پرچمِ گسترش +۱ میلیون · شهرت +۵' },
+      { t: 'شراکتِ استراتژیک با آرمان', fx: { f: 3, rel: { arman: 2 }, flag: 'alliance', ally: -1 }, note: 'پرچمِ گسترش · متحدِ رسمی · رقابت −۱' },
+    ] } },
+  { t: 'پیشنهادِ نهایی', when: { k: 'fame', n: 85, flags: ['globalUp'] },
+    beats: [
+      { who: 'victor', t: 'آخرین پیشنهاد، حضوری: امپراتوریِ تو را با ۲۵ میلیارد می‌خرم؛ تو مدیرِ ارشدِ بخشِ «مستقل‌ها» می‌شوی — با دفترِ شیشه‌ای و حقوقی که نسل‌ت خوابش را هم ندیده.' },
+      { who: 'victor', t: 'یا مسیرِ فرهاد: جنگ. شبکه‌ات را تک‌تک می‌خرم، تیم‌هایت را با پیشنهادِ غیرقابلِ رد می‌برم، و روزی که آخرین کافه‌نت بسته شد، خاکِ زیرِ آن اتاق را هم به اسمِ خودم ثبت می‌کنم.' },
+      { who: 'self', t: 'کلیدِ سه‌راهیِ جلوِ من است: میراث، قدرت، یا حقیقت. هر سه، یک آینده می‌سازند — فقط یکی‌شان، آیندهٔ فرهاد است.' },
+    ],
+    choice: { q: 'پاسخِ نهایی به ویکتور کراون؟', opts: [
+      { t: '«امپراتوریِ مستقل — ردِ قاطع»', fx: { f: 8, ally: 1, flag: 'endIndependent', rel: { nika: 1 } }, note: 'پایانِ A · شهرت +۸ · رقابت +۱' },
+      { t: '«پذیرشِ شراکتِ کراون — ۲۵ میلیارد»', fx: { m: 25000000, ally: -2, flag: 'endCorporate' }, note: 'پایانِ B · قدرتِ مالیِ عظیم' },
+      { t: '«انفجارِ آرشیو — افشای NEXUS»', fx: { f: 10, ally: 1, flag: 'endRevolution', rel: { kian: 1 } }, reqFlags: ['evd1', 'evd2', 'evd3'], note: 'پایانِ C · نیازمندِ هر سه قطعهٔ مدرک' },
+    ] } },
+  { t: 'قهرمانیِ جهان و میراث', when: { k: 'fame', n: 88, flagsAny: ['endIndependent', 'endCorporate', 'endRevolution'] },
+    beats: [
+      { who: 'sara', t: 'فینالِ جهانی تمام شد. تابلوی امتیاز قفل شد و اسمِ کافه‌نت بالای سکو درخشید — با هر رنگی که این شب را انتخاب کرده بودی.' },
+      { who: 'nika', t: 'گزارشِ نهاییِ عملیات: شبکه، پایدار. آرشیو، امن. تیم، قهرمان. و دفترچه‌ای که دیشب بسته شد، امروز به یک افسانه تبدیل شده است.' },
+      { who: 'farhad', t: '«امپراتوریِ واقعی آن چیزی نیست که دیگران را زیرِ سلطه بگیرد؛ امپراتوریِ واقعی رؤیایی است که نسل‌هایِ بعدی آن را ادامه می‌دهند.» — آخرین ضبطِ نوار، تاریخ‌گذاری‌شده به شبِ همین فینال.' },
+      { who: 'self', t: 'پرچم را بالای دفترِ مرکزی بستم. فصلِ کمپین تمام است؛ اما امپراتوری، هر صبح از اول شروع می‌شود. حالتِ امپراتوری فعال شد — ساختن ادامه دارد.' },
+    ],
+    choice: { q: 'اعلامِ نهاییِ میراث؟', opts: [
+      { t: '«تندیسِ فرهاد را بالای در می‌گذاریم»', fx: { f: 5, flag: 'legacyDone', rel: { sara: 1 } }, note: 'کمپین ثبت شد · حالتِ امپراتوری' },
+      { t: '«بعدی: فتحِ بازارِ آزاد»', fx: { m: 2000000, flag: 'legacyDone' }, note: 'کمپین ثبت شد · +۲ میلیون' },
+    ] } },
 ];
 
 /* ================= v1.15.0 — مأموریت‌های داستانیِ فصل ۱ ================= */
@@ -6575,6 +6830,35 @@ const STORY_MIS = [
   { id:'sm8',  t:'روزِ طلایی',      d:'درآمدِ یک روز از ۲ میلیون بگذرد',            goal:2000000, k:'maxDay', r:350000 },
   { id:'sm9',  t:'زیباییِ آب',      d:'آکواریومِ سالن را بخر — بهارِ درونِ بازی',    goal:1,   k:'aq',         r:250000, f:3 },
   { id:'sm10', t:'تولدِ امپراتوری',  d:'شهرت را به ۸۰ برسان و فصلِ ۱ را تمام کن',    goal:80,  k:'fame',       r:500000, f:10 },
+  /* ============ v1.16.0 — فصلِ ۲: جنگِ پادشاهان ============ */
+  { id:'sm11', t:'نامِ محله',        d:'شهرت را به ۶۰ برسان',                  ch:2, goal:60,       k:'fame',     r:600000, f:5,  req:'metArman' },
+  { id:'sm12', t:'پیروزیِ جنگِ قیمت', d:'درآمدِ یک روز از ۳ میلیون بگذرد',       ch:2, goal:3000000,  k:'maxDay',   r:700000,     req:'priceWar' },
+  { id:'sm13', t:'تیمِ دوم',         d:'دومین کارمندِ تیم را استخدام کن',       ch:2, goal:2,        k:'crew',     r:500000 },
+  { id:'sm14', t:'اولین VIP',        d:'اولین مشتریِ VIP را میزبانی کن',        ch:2, goal:1,        k:'vipCum',   r:600000, f:4 },
+  { id:'sm15', t:'سخت‌افزارِ کیان',   d:'کیفیتِ سیستم‌ها را تا سطحِ ۲ ببر',      ch:2, goal:2,        k:'pcTier',   r:550000, req:'kianJoined' },
+  { id:'sm16', t:'تورنمنتِ دوم',     d:'دومین تورنمنت را برگزار کن',            ch:2, goal:2,        k:'tourneys', r:800000, f:8, req:'saraJoined' },
+  { id:'sm17', t:'رازِ رقیب',        d:'فشارِ مالیِ آرمان به NEXUS را کشف کن',  ch:2, goal:1,        k:'f_armSecret2', r:500000, req:'armSecret2' },
+  /* ============ فصلِ ۳: رازِ پدربزرگ ============ */
+  { id:'sm18', t:'اتاقِ مخفی',       d:'اتاقِ زیرزمینی را کشف کن',              ch:3, goal:1,        k:'f_secretRoom', r:400000, req:'secretRoom' },
+  { id:'sm19', t:'سرورِ زنده',       d:'سرورِ پدربزرگ را بازسازی کن',           ch:3, goal:1,        k:'f_serverUp',   r:500000, req:'serverUp' },
+  { id:'sm20', t:'قطعهٔ اول',        d:'قراردادِ شراکتِ قدیمی را ثبت کن',       ch:3, goal:1,        k:'f_evd1',   r:300000, req:'evd1' },
+  { id:'sm21', t:'قطعهٔ دوم',        d:'الگویِ قراردادهایِ فاسد را ثبت کن',     ch:3, goal:1,        k:'f_evd2',   r:300000, req:'evd2' },
+  { id:'sm22', t:'قطعهٔ سوم',        d:'آرشیوِ KRWN-2029 را بازیابی کن',        ch:3, goal:1,        k:'f_evd3',   r:300000, req:'evd3' },
+  { id:'sm23', t:'سرنوشتِ آرمان',    d:'تصمیمِ نهایی دربارهٔ آرمان را بگیر',    ch:3, goal:1,        k:'f_armDecided', r:400000, req:'armSecret2' },
+  { id:'sm24', t:'سنگرِ متحد',       d:'آرمان را به متحدِ رسمی تبدیل کن',       ch:3, goal:1,        k:'f_armAlly', r:450000, req:'armAlly' },
+  /* ============ فصلِ ۴: فتحِ جهان ============ */
+  { id:'sm25', t:'شعبهٔ دوم',        d:'سومین میزِ سالنِ دوم را فعال کن',       ch:4, goal:3,        k:'sys',      r:900000, req:'victorContact' },
+  { id:'sm26', t:'اسپانسرِ مستقل',   d:'اسپانسرِ بدونِ شرطِ کراون جذب کن',      ch:4, goal:1,        k:'f_sponsor', r:800000, req:'sponsor' },
+  { id:'sm27', t:'تیمِ حرفه‌ای',     d:'چهارمین تورنمنت را با تیمِ سارا ببر',   ch:4, goal:4,        k:'tourneys', r:900000, f:10, req:'saraJoined' },
+  { id:'sm28', t:'قهرمانیِ منطقه',   d:'پنجمین تورنمنت را فتح کن',              ch:4, goal:5,        k:'tourneys', r:1200000, f:12 },
+  { id:'sm29', t:'مقاومتِ مالی',     d:'درآمدِ یک روز از ۸ میلیون بگذرد',       ch:4, goal:8000000,  k:'maxDay',   r:800000, req:'globalUp' },
+  { id:'sm30', t:'اتحادِ استراتژیک', d:'پیمانِ رسمی با آرمان ببند',             ch:4, goal:1,        k:'f_alliance', r:700000, req:'alliance' },
+  /* ============ فصلِ ۵: امپراتور یا نابودگر ============ */
+  { id:'sm31', t:'آماده‌سازیِ نهایی', d:'شهرت را به ۹۰ برسان',                  ch:5, goal:90,       k:'fame',     r:1000000, f:10, req:'endAny5' },
+  { id:'sm32', t:'آخرین تیم',        d:'ششمین تورنمنت را ببر',                  ch:5, goal:6,        k:'tourneys', r:1000000, req:'endAny5' },
+  { id:'sm33', t:'حقیقتِ کامل',      d:'هر سه قطعهٔ مدرک + سرور را کامل کن',    ch:5, goal:1,        k:'truthFull', r:1000000, f:8 },
+  { id:'sm34', t:'قهرمانیِ جهان',    d:'هشتمین تورنمنت را فتح کن',              ch:5, goal:8,        k:'tourneys', r:1500000, f:15 },
+  { id:'sm35', t:'میراثِ امپراتوری', d:'کمپین را به پایانِ نهایی برسان',        ch:5, goal:1,        k:'f_legacyDone', r:2000000, f:15, req:'legacyDone' },
 ];
 function storyMisVal(m){
   const P = Save.d.story.miProg || {};
@@ -6583,12 +6867,20 @@ function storyMisVal(m){
   if(m.k === 'maxDay')   return Math.max(P.maxDay || 0, G.dayStats ? (G.dayStats.earned || 0) : 0);
   if(m.k === 'tourneys') return Math.max(P.tour || 0, G.runStats && G.runStats.tourneys || 0);
   if(m.k === 'fame')     return G.fame || 0;
+  if(m.k === 'vipCum')   return (P.vip || 0) + (G.dayStats ? (G.dayStats.vipServed || 0) : 0); /* v1.16.0 */
+  if(m.k === 'crew')     return (Save.d.crew && Save.d.crew.length) || 0;
+  if(m.k === 'truthFull'){ const F = Save.d.story.flags; return (F.evd1 && F.evd2 && F.evd3 && F.serverUp) ? 1 : 0; }
   if(m.k.indexOf('f_') === 0) return Save.d.story.flags[m.k.slice(2)] ? 1 : 0;
   return lvl(m.k) || 0;
 }
 function storyMisTick(){
   try{
     const S = Save.d.story;
+    /* v1.16.0 — پرچم‌هایِ ترکیبیِ مأموریت‌ها */
+    if(S.flags.armSecret) S.flags.armSecret2 = true;
+    if(S.flags.armHelped || S.flags.armExploit) S.flags.armDecided = true;
+    if(S.flags.endIndependent || S.flags.endCorporate || S.flags.endRevolution) S.flags.endAny5 = true;
+    if(S.flags.sponsor || S.flags.alliance) S.flags.globalUp = true; /* v1.16.0 */
     if(!S.miNot) S.miNot = [];
     for(const m of STORY_MIS){
       if(S.smDone.indexOf(m.id) >= 0 || S.miNot.indexOf(m.id) >= 0) continue;
@@ -6607,6 +6899,7 @@ function storyMisDayEnd(){
     if((G.dayStats.served || 0) >= 15 && (G.dayStats.angry || 0) === 0) P.cleanDay = 1;
     P.maxDay = Math.max(P.maxDay || 0, G.dayStats.earned || 0);
     P.tour = Math.max(P.tour || 0, (G.runStats && G.runStats.tourneys) || 0);
+    P.vip = (P.vip || 0) + (G.dayStats.vipServed || 0); /* v1.16.0 */
     storyMisTick();
   } catch (e) {}
 }
@@ -6616,6 +6909,7 @@ let stIdx = 0, stBeats = [], stBeatI = 0, stTyping = null, stRO = false, stChoic
 
 function storyWhen(w){
   if(w.flags){ for(const fl of w.flags) if(!Save.d.story.flags[fl]) return false; } /* v1.15.0 */
+  if(w.flagsAny){ let any = false; for(const fl of w.flagsAny) if(Save.d.story.flags[fl]) any = true; if(!any) return false; } /* v1.16.0 */
   if(w.k === 'start') return Save.d.day === 1 && (G.runStats.served || 0) === 0 && !('seenHow' in Save.d && Save.d.seenHow === 2);
   if(w.k === 'day') return Save.d.day >= w.n;
   if(w.k === 'serve') return (G.runStats.served || 0) >= w.n;
@@ -6679,6 +6973,7 @@ function stShowBeat(){
     q.textContent = c.choice.q;
     btns.appendChild(q);
     for(const o of c.choice.opts){
+      if(o.reqFlags && !o.reqFlags.every(f => Save.d.story.flags[f])) continue; /* v1.16.0 — گزینهٔ مشروطِ مدرک */
       const bt = document.createElement('button');
       bt.className = 'nbtn stopt';
       bt.innerHTML = o.t + '<span class="note">' + (o.note || '') + '</span>';
@@ -6721,6 +7016,7 @@ function stApply(fx){
   if(fx.flag) Save.d.story.flags[fx.flag] = true;
   if(fx.sup) Save.d.supplier = true;
   if(fx.lg) Save.d.loyal.good = (Save.d.loyal.good || 0) + fx.lg;
+  if(fx.rel){ Save.d.story.rel = Save.d.story.rel || {}; for(const k in fx.rel) Save.d.story.rel[k] = clamp((Save.d.story.rel[k] || 0) + fx.rel[k], -3, 3); } /* v1.16.0 — رابطه‌ها */
   if(fx.up && typeof UPGRADES !== 'undefined'){ const uu = UPGRADES.find(x => x.id === fx.up); if(uu){ Save.d.up[fx.up] = Math.max(Save.d.up[fx.up] || 0, 1); try { if(typeof buildBG === 'function') buildBG(); } catch (e2) {} toast('🎁 ' + uu.name + ' — پاداشِ داستان', 'amber'); } } /* v1.15.0 */
   if(fx.m || fx.f) toast('📖 پیامدِ داستان اعمال شد', 'cyan');
   persist();
@@ -6746,7 +7042,7 @@ function stAdvanceKey(){ /* ESC روی دیالوگ */
 /* v1.15.0 — شهرتِ روزانهٔ دکور + یادداشتِ تورنمنت */
 function fameDayBonus(){
   try{
-    const b = (lvl('aq') ? 2 : 0) + (lvl('bonsai') ? 1 : 0);
+    const b = (lvl('aq') ? 2 : 0) + (lvl('bonsai') ? 1 : 0) + (Save.d.story.flags.endRevolution ? 1 : 0); /* v1.16.0 */
     if(b){ G.fame = clamp(G.fame + b, 0, 100); floater(G.cam.x + 240, 118, '+' + faNum(b) + ' شهرتِ دکور', '#8b5cf6'); }
   } catch (e) {}
 }
@@ -6763,6 +7059,12 @@ function openStoryLog(){
   rvd.className = 'ps'; rvd.style.cssText = 'border:1px solid #2a3550;border-radius:10px;padding:8px';
   rvd.innerHTML = '<b>🐺 آرمان دِهقان — NEXUS CORP</b><span class="note">میزِ تنش: ' + (rv > 0 ? '+' : '') + faNum(rv) + ' از ±۳</span>' + mkBar(Math.abs(rv), 3);
   list.appendChild(rvd);
+  if(Save.d.story.flags.legacyDone){ /* v1.16.0 — نشانِ پایان */
+    const eb = document.createElement('div'); eb.className = 'ps';
+    eb.style.cssText = 'border:1px solid #8b5cf6;border-radius:10px;padding:8px;background:rgba(139,92,246,.08)';
+    eb.innerHTML = '<b>👑 پایانِ کمپین: ' + (Save.d.story.flags.endRevolution ? 'انقلابِ بازار — نسلِ جدیدِ گیمینگ آزاد شد' : Save.d.story.flags.endCorporate ? 'شاهِ شرکتیِ جدید — قدرت، بهایِ استقلال بود' : 'امپراتوریِ مستقل — رؤیای فرهاد ادامه دارد') + '</b><span class="note">حالتِ امپراتوری فعال است — ساختن ادامه دارد.</span>';
+    list.appendChild(eb);
+  }
   /* تب‌ها */
   const tabs = document.createElement('div');
   tabs.style.cssText = 'display:flex;gap:6px;margin:8px 0';
@@ -6774,20 +7076,39 @@ function openStoryLog(){
     if(cur === 'chs'){
       const seen = Save.d.story.seen || [];
       if(!seen.length){ const d = document.createElement('div'); d.className = 'ps'; d.textContent = 'هنوز فصلی باز نشده — روزهای کافه را پیش ببر تا داستان آغاز شود.'; body.appendChild(d); }
-      const FINALE_I = STORY.findIndex(c => c.t === 'تولد یک امپراتوری');
+      const GI = [0, STORY.findIndex(c => c.t === 'نبردِ قیمت‌ها'), STORY.findIndex(c => c.t === 'اتاقِ زیرزمینی'), STORY.findIndex(c => c.t === 'گسترشِ امپراتوری'), STORY.findIndex(c => c.t === 'پیشنهادِ نهایی')];
+      const GN = ['فصلِ ۱ — تولد یک امپراتوری', 'فصلِ ۲ — جنگِ پادشاهان', 'فصلِ ۳ — رازِ پدربزرگ', 'فصلِ ۴ — فتحِ جهان', 'فصلِ ۵ — امپراتور یا نابودگر'];
       for(const s of seen.slice().sort((a, b) => a.i - b.i)){
         const c = STORY[s.i]; if(!c) continue;
-        if(s.i === 0) mkHead('فصلِ ۱ — تولد یک امپراتوری');
-        if(s.i === FINALE_I + 1) mkHead('فصلِ ۲ — جنگِ پادشاهان');
+        const gi = GI.indexOf(s.i);
+        if(gi >= 0) mkHead(GN[gi]); /* v1.16.0 — پنج فصل */
         const row = document.createElement('button');
         row.className = 'nbtn ghost logrow';
         row.innerHTML = '<b>' + c.t + '</b><span class="note">' + (s.pick ? 'انتخابِ تو: ' + s.pick : 'بدونِ انتخاب') + '</span>';
         row.onclick = () => { Sfx.tickS(); hideFade('storyLog'); setTimeout(() => openStory(s.i, true), 240); };
         body.appendChild(row);
       }
-      const locked = [['فصلِ ۳ — رازِ پدربزرگ', 'پس از نامهٔ کراون باز می‌شود'], ['فصلِ ۴ — فتحِ جهان', 'شعبه‌ها و نقشهٔ شهرها'], ['فصلِ ۵ — امپراتور یا نابودگر', 'سه پایانِ نهایی']];
-      for(const L of locked){ const d = document.createElement('div'); d.className = 'ps'; d.innerHTML = '<b>🔒 ' + L[0] + '</b><span class="note">' + L[1] + '</span>'; body.appendChild(d); }
+      if(Save.d.story.flags.legacyDone){ const d = document.createElement('div'); d.className = 'ps'; d.innerHTML = '<b>👑 میراث — پایانِ کمپین ثبت شد</b><span class="note">حالتِ امپراتوری: ساختن ادامه دارد</span>'; body.appendChild(d); }
     } else if(cur === 'chr'){
+      /* ویرایشگرِ بنیان‌گذار (نام / لباس / مو) */
+      const fd = Save.d.story.founder = Save.d.story.founder || {};
+      const ed = document.createElement('div'); ed.className = 'ps';
+      ed.style.cssText = 'border:1px solid #2a3550;border-radius:10px;padding:8px';
+      const nm = document.createElement('input'); nm.type = 'text'; nm.maxLength = 12; nm.placeholder = 'نامِ بنیان‌گذار…'; nm.value = fd.name || '';
+      nm.style.cssText = 'width:100%;background:#0e1420;border:1px solid #2a3550;border-radius:8px;color:#dfe8ff;padding:6px 8px;font-family:inherit;direction:rtl;box-sizing:border-box';
+      nm.onchange = () => { fd.name = nm.value.trim() || null; applyFounder(); persist(); };
+      const sw = document.createElement('div'); sw.style.cssText = 'display:flex;gap:6px;margin-top:6px';
+      for(const sh of [['#2a5ac0', 'آبی'], ['#7c3aed', 'بنفشِ امپراتوری'], ['#111827', 'مشکیِ پریمیوم']]){
+        const b = document.createElement('button'); b.className = 'nbtn ghost'; b.style.cssText = 'flex:1;font-size:10px;padding:5px;border-color:' + (fd.shirt === sh[0] ? sh[0] : '#2a3550'); b.textContent = sh[1];
+        b.onclick = () => { Sfx.tickS(); fd.shirt = sh[0]; applyFounder(); persist(); render(); }; sw.appendChild(b);
+      }
+      const st = document.createElement('div'); st.style.cssText = 'display:flex;gap:6px;margin-top:6px';
+      for(const sy of [['spiky', 'مویِ تیک'], ['buzz', 'کوتاه'], ['long', 'بلند']]){
+        const b = document.createElement('button'); b.className = 'nbtn ghost'; b.style.cssText = 'flex:1;font-size:10px;padding:5px;border-color:' + (fd.style === sy[0] ? '#8b5cf6' : '#2a3550'); b.textContent = sy[1];
+        b.onclick = () => { Sfx.tickS(); fd.style = sy[0]; applyFounder(); persist(); render(); }; st.appendChild(b);
+      }
+      ed.appendChild(nm); ed.appendChild(sw); ed.appendChild(st);
+      body.appendChild(ed);
       const canon = [['self', 'fb_hero', 'THE FOUNDER — انتخاب‌های تو تاریخ را می‌سازد'], ['nika', 'fb_nika', (Save.d.story.flags.nikaJoined ? '✅ عضوِ تیم' : 'هنوز استخدام نشده — فصلِ «قراردادِ عملیات»')], ['kian', 'fb_kian', (Save.d.story.flags.kianJoined ? '✅ عضوِ تیم' : 'در انتظارِ قراردادِ نگهداری')], ['sara', 'fb_sara', (Save.d.story.flags.saraJoined ? '✅ مربیِ کافه' : 'بعد از اولین تورنمنت می‌آید')], ['farhad', 'fb_farhad', 'فقط در فلش‌بک و نوارهای میراث'], ['arman', 'fb_arman', 'رقیبِ اصلی — NEXUS CORP'], ['victor', 'fb_victor', 'آنتاگونیست — هلدینگِ کراون'], ['rahim', null, 'نگهبانِ میراث'], ['karam', null, 'مشتریِ وفادارِ محل'], ['naz', null, 'استریمر — بازوِ رسانه‌ایِ برند']];
       for(const cc of canon){
         const ch = CHARS[cc[0]]; if(!ch) continue;
@@ -6798,7 +7119,9 @@ function openStoryLog(){
         const pim = cc[1] ? ((typeof ART !== 'undefined' && ART.ok && ART.img[cc[1]]) || null) : null;
         if(pim){ gg.imageSmoothingEnabled = true; const ar = pim.width / pim.height, dw = Math.round(64 * ar); gg.drawImage(pim, (34 - dw) >> 1, 0, dw, 64); } else { gg.fillStyle = ch.bg || '#222'; gg.fillRect(0, 0, 34, 64); }
         const tx = document.createElement('div');
-        tx.innerHTML = '<b>' + ch.name + '</b><span class="note">' + ch.role + ' · ' + cc[2] + '</span>';
+        const rl = clamp((Save.d.story.rel && Save.d.story.rel[cc[0]]) || 0, -3, 3);
+        const rw = Math.round(100 * (rl + 3) / 6);
+        tx.innerHTML = '<b>' + ch.name + '</b><span class="note">' + ch.role + ' · ' + cc[2] + '</span><div style="height:5px;border-radius:4px;background:#1b2230;margin-top:3px"><div style="height:5px;border-radius:4px;width:' + rw + '%;background:linear-gradient(90deg,#e14d5a,#8b5cf6,#4cff9e)"></div></div>'; /* v1.16.0 — مترِ رابطه */
         row.appendChild(imw); row.appendChild(tx); body.appendChild(row);
       }
       mkHead('تیپ‌های مشتری');
@@ -6816,17 +7139,21 @@ function openStoryLog(){
       body.appendChild(grd);
     } else {
       const S = Save.d.story;
+      const CHN = { 1: 'فصلِ ۱ — تولد یک امپراتوری', 2: 'فصلِ ۲ — جنگِ پادشاهان', 3: 'فصلِ ۳ — رازِ پدربزرگ', 4: 'فصلِ ۴ — فتحِ جهان', 5: 'فصلِ ۵ — امپراتور یا نابودگر' };
+      let lastCh = -1;
       for(const m of STORY_MIS){
+        if(m.ch && m.ch !== lastCh){ lastCh = m.ch; mkHead(CHN[m.ch] || ('فصلِ ' + faNum(m.ch))); }
+        const isLk = !!(m.req && !Save.d.story.flags[m.req]); /* v1.16.0 — پرچم‌هایِ ترکیبی در storyMisTick ست می‌شوند */
         const done = S.smDone && S.smDone.indexOf(m.id) >= 0;
         const v = storyMisVal(m);
         const row = document.createElement('div'); row.className = 'ps';
-        row.style.cssText = 'border:1px solid ' + (done ? '#1e4d3a' : '#232c40') + ';border-radius:10px;padding:6px';
-        row.innerHTML = '<b>' + (done ? '✅ ' : (v >= m.goal ? '🎁 ' : '◻ ')) + m.t + '</b><span class="note">' + m.d + '</span>' + mkBar(v, m.goal);
+        row.style.cssText = 'border:1px solid ' + (done ? '#1e4d3a' : (isLk ? '#1a1f2c' : '#232c40')) + ';border-radius:10px;padding:6px' + (isLk ? ';opacity:.55' : '');
+        row.innerHTML = '<b>' + (done ? '✅ ' : (isLk ? '🔒 ' : (v >= m.goal ? '🎁 ' : '◻ '))) + m.t + '</b><span class="note">' + m.d + (isLk && m.req !== 'endAny5' ? ' · با پیشرویِ داستان باز می‌شود' : '') + '</span>' + mkBar(v, m.goal); /* v1.16.0 — گروه‌بندیِ فصل + قفل */
         if(!done){
           const bt = document.createElement('button'); bt.className = 'nbtn ghost';
           bt.style.cssText = 'font-size:11px;padding:4px 10px;margin-top:4px';
           bt.textContent = v >= m.goal ? 'دریافتِ جایزه: ' + fmtK(m.r) : 'پیشرفت: ' + faNum(Math.min(v, m.goal)) + ' از ' + faNum(m.goal);
-          if(v >= m.goal) bt.onclick = () => {
+          if(v >= m.goal && !isLk) bt.onclick = () => {
             G.money += m.r; if(m.f) G.fame = clamp(G.fame + m.f, 0, 100);
             S.smDone = S.smDone || []; S.smDone.push(m.id);
             toast('🎁 ' + m.t + ' — ' + fmtK(m.r), 'amber'); Sfx.mission(); persist(); render();
@@ -7559,6 +7886,7 @@ cv.addEventListener('pointerdown', e => {
     Sfx.tickS();
     return;
   }
+  if(tapCanonNPC(wx, v.y)) return; /* v1.16.0 — NPCهای کانن */
   const si = hitSliderBand(wx, v.y);
   if(si >= 0){
     const p = deskPos(si);
@@ -8382,7 +8710,7 @@ document.addEventListener('DOMContentLoaded', init);
  * ذخیره‌ی بازی دست‌نخورده می‌ماند (همان origin و همان localStorage).
  */
 const UPD = {
-  VER: '1.15.0',
+  VER: '1.16.0',
   /* v1.14.0 — آینه‌ها: rawِ گیت‌هاب روی خیلی از شبکه‌های ایران باز نمی‌شود؛
      همهٔ درخواست‌ها زنجیرهٔ آینه دارند + timeoutِ ۷ث + تلاشِ فوری و تکرارِ خودکار */
   URLS: [
