@@ -1,7 +1,7 @@
 {
-  "version": "1.14.0",
-  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.14.0/cafnet.html",
-  "notes": "موتورِ OTA فوری و چندآینه: چکِ بلافاصله بعد از بوت، ۵ آینه با fallback، timeout، تلاشِ خودکارِ ۲۰ثانیه‌ای — پایانِ آپدیتِ گیرکرده روی شبکه‌های ایران",
+  "version": "1.15.0",
+  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.15.0/cafnet.html",
+  "notes": "فاز C: کاننِ داستان (نیکا/کیان/سارا/آرمان/فرهاد/ویکتور) + ۱۰ مأموریتِ داستانیِ فصل ۱ + جورنالِ سه‌تبی + پرتره‌ها و دکورهای v3 + رفعِ باگِ مهاجرت",
   "minApk": 2,
   "published": "2026-11-21"
 }
