@@ -1,7 +1,7 @@
 {
-  "version": "1.13.0",
-  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.13.0/cafnet.html",
-  "notes": "پاسِ کیفیت: حذفِ کاملِ چشمکِ نورها (بنر/نئون/رَک/TV) + سپرِ رسم (پایانِ آدمکِ نامرئی و فریمِ نیمه‌کاره) + سایه و بابِ راه‌رفتن + ساعت و پوسترِ دیوار",
+  "version": "1.14.0",
+  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.14.0/cafnet.html",
+  "notes": "موتورِ OTA فوری و چندآینه: چکِ بلافاصله بعد از بوت، ۵ آینه با fallback، timeout، تلاشِ خودکارِ ۲۰ثانیه‌ای — پایانِ آپدیتِ گیرکرده روی شبکه‌های ایران",
   "minApk": 2,
   "published": "2026-11-21"
 }

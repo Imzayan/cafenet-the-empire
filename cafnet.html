@@ -8,7 +8,7 @@
 try{
   if(!/^https?:/.test(String(location.protocol)) && window === window.parent){
     var _bv = localStorage.getItem('cafnet_bundle_ver');
-    var _bootVer = '1.13.0';
+    var _bootVer = '1.14.0';
     var _nv = function(v){ v = String(v).split('.'); return [+(v[0]||0), +(v[1]||0), +(v[2]||0)]; };
     if(_bv && _bv !== _bootVer){
       var _a = _nv(_bv), _b = _nv(_bootVer), _newer = false;
@@ -8083,8 +8083,16 @@ document.addEventListener('DOMContentLoaded', init);
  * ذخیره‌ی بازی دست‌نخورده می‌ماند (همان origin و همان localStorage).
  */
 const UPD = {
-  VER: '1.13.0',
-  URL: 'https://raw.githubusercontent.com/Imzayan/cafenet-the-empire/main/update.json',
+  VER: '1.14.0',
+  /* v1.14.0 — آینه‌ها: rawِ گیت‌هاب روی خیلی از شبکه‌های ایران باز نمی‌شود؛
+     همهٔ درخواست‌ها زنجیرهٔ آینه دارند + timeoutِ ۷ث + تلاشِ فوری و تکرارِ خودکار */
+  URLS: [
+    'https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@main/update.json',
+    'https://fastly.jsdelivr.net/gh/Imzayan/cafenet-the-empire@main/update.json',
+    'https://gcore.jsdelivr.net/gh/Imzayan/cafenet-the-empire@main/update.json',
+    'https://testingcf.jsdelivr.net/gh/Imzayan/cafenet-the-empire@main/update.json',
+    'https://raw.githubusercontent.com/Imzayan/cafenet-the-empire/main/update.json'
+  ],
 
   cmp(a, b) {
     const A = String(a).split('.').map(Number), B = String(b).split('.').map(Number);
@@ -8092,53 +8100,101 @@ const UPD = {
     return 0;
   },
 
+  fetchT(url, ms) {
+    if (typeof fetch !== 'function') return null;
+    try {
+      if (typeof AbortController === 'function') {
+        const ac = new AbortController();
+        const to = setTimeout(() => { try { ac.abort(); } catch (e) {} }, ms || 7000);
+        return fetch(url, { signal: ac.signal }).then(r => { clearTimeout(to); return r; }).catch(e => { clearTimeout(to); throw e; });
+      }
+      return fetch(url);
+    } catch (e) { return null; }
+  },
+
+  /* اولین آینه که جواب داد برنده است؛ هیچ‌کدام → null */
+  tryUrls(list, ms) {
+    let i = 0;
+    return new Promise(res => {
+      const next = () => {
+        if (i >= list.length) { res(null); return; }
+        const f = this.fetchT(list[i++] + '?t=' + Date.now(), ms);
+        if (!f) { next(); return; }
+        f.then(r => { if (!r || !r.ok) throw 0; return r.text(); })
+         .then(txt => res(txt))
+         .catch(() => setTimeout(next, 250));
+      };
+      next();
+    });
+  },
+
+  /* آدرسِ bundle → زنجیرهٔ آینه‌ها (سواپِ هاست + نسخهٔ raw) */
+  bundleUrls(u) {
+    const out = [u];
+    try {
+      const mm = String(u).match(/^https:\/\/([^/]+)\/gh\/([^/]+)\/([^/@]+)@([^/]+)\/(.+)$/);
+      if (mm) {
+        const path = '/gh/' + mm[2] + '/' + mm[3] + '@' + mm[4] + '/' + mm[5];
+        for (const h of ['fastly.jsdelivr.net', 'gcore.jsdelivr.net', 'testingcf.jsdelivr.net'])
+          if (h !== mm[1]) out.push('https://' + h + path);
+        out.push('https://raw.githubusercontent.com/' + mm[2] + '/' + mm[3] + '/' + mm[4] + '/' + mm[5]);
+      }
+    } catch (e) {}
+    return out;
+  },
+
   check() {
     try {
-      // پاکسازیِ bundleِ کهنه‌تر از کدِ در حالِ اجرا
       const bv = localStorage.getItem('cafnet_bundle_ver');
       if (bv && this.cmp(bv, this.VER) < 0) {
         localStorage.removeItem('cafnet_bundle');
         localStorage.removeItem('cafnet_bundle_ver');
       }
-      if (/^https?:/.test(location.protocol)) return;  // نسخه‌ی هاست‌شده خودش تازه است؛ file: و iframeِ bundle آپدیت می‌گیرند
+      if (/^https?:/.test(location.protocol)) return;
       if (!navigator.onLine) return;
-      const t = localStorage.getItem('cafnet_upd_test');   // فقط برای تستِ محلی
-      setTimeout(() => this._run(t || this.URL), 6000);
+      const t = localStorage.getItem('cafnet_upd_test');
+      /* v1.14.0 — فوری (۴۰۰ms بعد از لود)؛ بدونِ تأخیرِ ۶ثِ قبلی */
+      setTimeout(() => this._run(t ? [t] : this.URLS.slice(), 0), 400);
     } catch (e) {}
   },
 
-  _run(url) {
-    if (typeof fetch !== 'function') return; // WebViewهای خیلی قدیمی
-    fetch(url + '?t=' + Date.now())
-      .then(r => { if (!r.ok) throw 0; return r.json(); })
-      .then(m => {
-        if (!m || !m.version || !m.url) return;
-        if (this.cmp(m.version, this.VER) <= 0) return; // همین نسخه یا قدیمی‌تر
-        if (localStorage.getItem('cafnet_updating')) return;
-        localStorage.setItem('cafnet_updating', '1');
-        fetch(m.url + '?t=' + Date.now())
-          .then(r => { if (!r.ok) throw 0; return r.text(); })
-          .then(html => {
-            localStorage.removeItem('cafnet_updating');
-            if (html.length < 100000 || html.indexOf('</html>') < 0) return;
-            /* سلامتِ محتوا: نسخه‌ی امبدشده در خودِ فایل باید تازه‌تر از نسخه‌ی در حالِ اجرا باشد —
-               جلوگیری از rawِ stale (برچسبِ تازه + کدِ قدیمی = قفلِ ابدی روی نسخه‌ی کهنه) */
-            const mv = (html.match(/VER:\s*'([0-9]+\.[0-9]+\.[0-9]+)'/) || [])[1];
-            if (!mv || this.cmp(mv, this.VER) <= 0) return; // فایلِ ناهماهنگ — دفعه‌ی بعد دوباره تلاش می‌شود
-            localStorage.setItem('cafnet_bundle', html);
-                        localStorage.setItem('cafnet_bundle_ver', mv);
-            try { localStorage.removeItem('cafnet_bundle_badver'); } catch (e2) {}
-            try {
-              if(window === window.parent && String(location.protocol).indexOf('file') === 0 && typeof G !== 'undefined' && G && G.scene === 'menu'){
-                location.reload();  // فعال‌سازیِ آنی — بدونِ هیچ لمسِ کاربر
-              } else {
-                toast('✅ به‌روزرسانیِ ' + m.version + ' نصب شد — با خروج و ورودِ بعدی خودکار فعال می‌شود', 'green');
-              }
-            } catch (e) {}
-          })
-          .catch(() => { try { localStorage.removeItem('cafnet_updating'); } catch (e) {} });
-      })
-      .catch(() => { try { localStorage.removeItem('cafnet_updating'); } catch (e) {} });
+  _run(list, att) {
+    att = att || 0;
+    const self = this;
+    this.tryUrls(list, 7000).then(txt => {
+      let m = null;
+      try { m = JSON.parse(txt); } catch (e) {}
+      if (!m || !m.version || !m.url) {
+        /* آینه‌ها پاسخ ندادند — هر ۲۰ ثانیه دوباره، تا ۸ بار؛ از بارِ بعد هم دوباره */
+        if (att < 8 && !localStorage.getItem('cafnet_upd_ok')) {
+          setTimeout(() => self._run(list, att + 1), 20000);
+        }
+        return;
+      }
+      if (self.cmp(m.version, self.VER) <= 0) {
+        /* شبکه سالم و بازی تازه — حلقهٔ تلاش بسته شود */
+        try { localStorage.setItem('cafnet_upd_ok', String(Date.now())); } catch (e2) {}
+        return;
+      }
+      if (localStorage.getItem('cafnet_updating')) return;
+      localStorage.setItem('cafnet_updating', '1');
+      self.tryUrls(self.bundleUrls(m.url), 15000).then(html => {
+        localStorage.removeItem('cafnet_updating');
+        if (!html || html.length < 100000 || html.indexOf('</html>') < 0) return;
+        const mv = (html.match(/VER:\s*'([0-9]+\.[0-9]+\.[0-9]+)'/) || [])[1];
+        if (!mv || self.cmp(mv, self.VER) <= 0) return;
+        localStorage.setItem('cafnet_bundle', html);
+        localStorage.setItem('cafnet_bundle_ver', mv);
+        try { localStorage.removeItem('cafnet_bundle_badver'); } catch (e2) {}
+        try {
+          if (window === window.parent && String(location.protocol).indexOf('file') === 0 && typeof G !== 'undefined' && G && G.scene === 'menu') {
+            location.reload();  /* فعال‌سازیِ آنی روی منو — بدونِ هیچ لمسِ کاربر */
+          } else {
+            toast('✅ به‌روزرسانیِ ' + m.version + ' نصب شد — با خروج و ورودِ بعدی خودکار فعال می‌شود', 'green');
+          }
+        } catch (e) {}
+      }).catch(() => { try { localStorage.removeItem('cafnet_updating'); } catch (e2) {} });
+    }).catch(() => {});
   },
 };
 window.addEventListener('load', () => { try { UPD.check(); } catch (e) {} });
