@@ -90,7 +90,7 @@
 
     invoke-virtual {v1, v2}, Landroid/view/View;->setSystemUiVisibility(I)V
 
-    const-string v1, "file:///android_asset/boot.html"
+    const-string v1, "file:///android_asset/index.html"
 
     invoke-virtual {v0, v1}, Landroid/webkit/WebView;->loadUrl(Ljava/lang/String;)V
 
