@@ -1,6 +1,37 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
+<script>
+/* v1.11.1 — حلقهٔ آخرِ آپدیتِ خودکار: bundleِ ذخیره‌شده در بارِ قبل، همین‌جا در iframeِ srcdoc
+   اجرا می‌شود — scopeِ جدای JS (بدونِ برخوردِ const) و localStorageِ مشترک با شلِّ file:.
+   window.stop() پارسِ کدِ قدیمی را می‌بندد تا چیزی پشتِ بازیِ تازه اجرا نشود. */
+try{
+  if(!/^https?:/.test(String(location.protocol)) && window === window.parent){
+    var _bv = localStorage.getItem('cafnet_bundle_ver');
+    var _bootVer = '1.11.1';
+    var _nv = function(v){ v = String(v).split('.'); return [+(v[0]||0), +(v[1]||0), +(v[2]||0)]; };
+    if(_bv && _bv !== _bootVer){
+      var _a = _nv(_bv), _b = _nv(_bootVer), _newer = false;
+      for(var _i = 0; _i < 3; _i++){ if(_a[_i] !== _b[_i]){ _newer = _a[_i] > _b[_i]; break; } }
+      if(_newer){
+        var _src = localStorage.getItem('cafnet_bundle');
+        if(_src && _src.length > 100000 && _src.indexOf('</html>') > 0){
+          var _f = document.createElement('iframe');
+          _f.setAttribute('allowfullscreen', 'true');
+          _f.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:0;margin:0;padding:0;z-index:2147483647;background:#0b0e12';
+          document.documentElement.appendChild(_f);
+          _f.srcdoc = _src;
+
+          /* بی‌صداکردنِ بازیِ قدیمیِ والد — فقط همین‌جا؛ iframe پنجرهٔ JSِ خودش را دارد */
+          window.requestAnimationFrame = function(){ return 0; };
+          window.setInterval = function(){ return 0; };
+          window.fetch = function(){ return new Promise(function(){}); };
+        }
+      }
+    }
+  }
+}catch(_e){}
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0a0c10">
@@ -7784,7 +7815,7 @@ document.addEventListener('DOMContentLoaded', init);
  * ذخیره‌ی بازی دست‌نخورده می‌ماند (همان origin و همان localStorage).
  */
 const UPD = {
-  VER: '1.11.0',
+  VER: '1.11.1',
   URL: 'https://raw.githubusercontent.com/Imzayan/cafenet-the-empire/main/update.json',
 
   cmp(a, b) {
@@ -7801,7 +7832,7 @@ const UPD = {
         localStorage.removeItem('cafnet_bundle');
         localStorage.removeItem('cafnet_bundle_ver');
       }
-      if (!location.protocol.startsWith('file:')) return;  // نسخه‌ی هاست‌شده خودش تازه است
+      if (/^https?:/.test(location.protocol)) return;  // نسخه‌ی هاست‌شده خودش تازه است؛ file: و iframeِ bundle آپدیت می‌گیرند
       if (!navigator.onLine) return;
       const t = localStorage.getItem('cafnet_upd_test');   // فقط برای تستِ محلی
       setTimeout(() => this._run(t || this.URL), 6000);
@@ -7827,8 +7858,15 @@ const UPD = {
             const mv = (html.match(/VER:\s*'([0-9]+\.[0-9]+\.[0-9]+)'/) || [])[1];
             if (!mv || this.cmp(mv, this.VER) <= 0) return; // فایلِ ناهماهنگ — دفعه‌ی بعد دوباره تلاش می‌شود
             localStorage.setItem('cafnet_bundle', html);
-            localStorage.setItem('cafnet_bundle_ver', mv);
-            try { toast('✅ به‌روزرسانیِ ' + m.version + ' دانلود شد — دفعه‌ی بعد که باز کنی فعال است', 'green'); } catch (e) {}
+                        localStorage.setItem('cafnet_bundle_ver', mv);
+            try { localStorage.removeItem('cafnet_bundle_badver'); } catch (e2) {}
+            try {
+              if(window === window.parent && String(location.protocol).indexOf('file') === 0 && typeof G !== 'undefined' && G && G.scene === 'menu'){
+                location.reload();  // فعال‌سازیِ آنی — بدونِ هیچ لمسِ کاربر
+              } else {
+                toast('✅ به‌روزرسانیِ ' + m.version + ' نصب شد — با خروج و ورودِ بعدی خودکار فعال می‌شود', 'green');
+              }
+            } catch (e) {}
           })
           .catch(() => { try { localStorage.removeItem('cafnet_updating'); } catch (e) {} });
       })
