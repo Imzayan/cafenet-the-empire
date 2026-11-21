@@ -8,7 +8,7 @@
 try{
   if(!/^https?:/.test(String(location.protocol)) && window === window.parent){
     var _bv = localStorage.getItem('cafnet_bundle_ver');
-    var _bootVer = '1.12.1';
+    var _bootVer = '1.12.2';
     var _nv = function(v){ v = String(v).split('.'); return [+(v[0]||0), +(v[1]||0), +(v[2]||0)]; };
     if(_bv && _bv !== _bootVer){
       var _a = _nv(_bv), _b = _nv(_bootVer), _newer = false;
@@ -8050,7 +8050,7 @@ document.addEventListener('DOMContentLoaded', init);
  * ذخیره‌ی بازی دست‌نخورده می‌ماند (همان origin و همان localStorage).
  */
 const UPD = {
-  VER: '1.12.1',
+  VER: '1.12.2',
   URL: 'https://raw.githubusercontent.com/Imzayan/cafenet-the-empire/main/update.json',
 
   cmp(a, b) {
