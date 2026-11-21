@@ -1,7 +1,7 @@
 {
-  "version": "1.12.2",
-  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.12.2/cafnet.html",
-  "notes": "تکمیلِ گرافیک + مسیرِ دانلودِ jsDelivr (برای شبکه‌هایی که raw گیتهاب را مسدود کرده‌اند)",
+  "version": "1.13.0",
+  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.13.0/cafnet.html",
+  "notes": "پاسِ کیفیت: حذفِ کاملِ چشمکِ نورها (بنر/نئون/رَک/TV) + سپرِ رسم (پایانِ آدمکِ نامرئی و فریمِ نیمه‌کاره) + سایه و بابِ راه‌رفتن + ساعت و پوسترِ دیوار",
   "minApk": 2,
   "published": "2026-11-21"
 }

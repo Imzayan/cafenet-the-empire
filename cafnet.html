@@ -8,7 +8,7 @@
 try{
   if(!/^https?:/.test(String(location.protocol)) && window === window.parent){
     var _bv = localStorage.getItem('cafnet_bundle_ver');
-    var _bootVer = '1.12.2';
+    var _bootVer = '1.13.0';
     var _nv = function(v){ v = String(v).split('.'); return [+(v[0]||0), +(v[1]||0), +(v[2]||0)]; };
     if(_bv && _bv !== _bootVer){
       var _a = _nv(_bv), _b = _nv(_bootVer), _newer = false;
@@ -4359,7 +4359,7 @@ function buildVignette(){
 
 /* ================= دیوارِ پویا ================= */
 function drawNeonSign(){
-  const flick = 0.93 + 0.07 * Math.sin(G.t * 1.6);
+  const flick = 0.97 + 0.03 * Math.sin(G.t * 0.7); /* v1.13.0 تنفسِ بسیار نرم */
   putGlow(180, 67, 44, hexk('g'), 0.4 * flick);
   faText('کافه‌نت', 180, 67, 15, hexk('g'), 'center', true);
   ctx.globalAlpha = flick;
@@ -4369,28 +4369,54 @@ function drawNeonSign(){
   putGlow(224, 67, 12, hexk('p'), 0.55 * flick);
   void flick;
 }
+/* v1.13.0 — دکورِ دیوار: ساعتِ زندهٔ روز + دو قابِ پوستر (بدونِ چشمک) */
+function drawWallDeco(){
+  function poster(px, py, pw, ph, col, t){
+    ctx.fillStyle = 'rgba(9,12,17,.9)';
+    ctx.fillRect(px, py, pw, ph);
+    ctx.strokeStyle = col; ctx.globalAlpha = .5;
+    ctx.strokeRect(px + .5, py + .5, pw - 1, ph - 1);
+    ctx.globalAlpha = 1;
+    faText(t, px + pw / 2, py + ph / 2 + 3, 8, col, 'center', true);
+    faText('☕', px + pw / 2, py + ph - 8, 7, '#dfe8ff', 'center');
+  }
+  poster(430, 62, 26, 34, '#ff5fa2', 'CG');
+  poster(560, 62, 26, 34, '#4cff9e', 'VIP');
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,.16)'; ctx.lineWidth = 1;
+  ctx.fillStyle = '#141b23';
+  ctx.beginPath(); ctx.arc(322, 64, 9, 0, TAU); ctx.fill(); ctx.stroke();
+  const prog = clamp(G.t / DAY_LEN, 0, 1);
+  const ha = -Math.PI / 2 + prog * Math.PI * 2;
+  const ma = -Math.PI / 2 + prog * Math.PI * 12;
+  ctx.strokeStyle = '#cfe0f0'; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.moveTo(322, 64); ctx.lineTo(322 + Math.cos(ha) * 5, 64 + Math.sin(ha) * 5); ctx.stroke();
+  ctx.strokeStyle = 'rgba(207,224,240,.6)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(322, 64); ctx.lineTo(322 + Math.cos(ma) * 7, 64 + Math.sin(ma) * 7); ctx.stroke();
+  ctx.restore();
+}
 function drawTV(){
   const bx = 249, by = 59;
   const bars = ['#ff5fa2', '#f2c14e', '#4cff9e', '#59c2ff'];
   ctx.save();
   ctx.beginPath(); ctx.rect(bx, by, 36, 24); ctx.clip();
-  const shift = Math.floor(G.t * 1.4) % 4;
+  const shift = Math.floor(G.t * 0.45) % 4;
   for(let i2 = 0; i2 < 4; i2++){
     ctx.fillStyle = bars[(i2 + shift) % 4];
-    ctx.globalAlpha = 0.25;
+    ctx.globalAlpha = 0.16;
     ctx.fillRect(bx + i2 * 9, by, 9, 24);
   }
   ctx.globalAlpha = 1;
   ctx.fillStyle = 'rgba(255,255,255,0.05)';
-  ctx.fillRect(bx, by + ((G.t * 22) % 24), 36, 1.6);
+  ctx.fillRect(bx, by + ((G.t * 9) % 24), 36, 1.6);
   ctx.restore();
 }
 function drawRack(){
-  const wave = 0.5 + 0.5 * Math.sin(G.t * 2.2);
-  ctx.globalAlpha = 0.25 + 0.7 * wave;
+  /* v1.13.0 — دو LEDِ ثابتِ نرم (چشمکِ یک‌درمیان حذف شد) */
+  ctx.globalAlpha = 0.5;
   ctx.fillStyle = pcol('g',1);
   ctx.fillRect(446, 92, 2.4, 2.4);
-  ctx.globalAlpha = 0.25 + 0.7 * (1 - wave);
+  ctx.globalAlpha = 0.5;
   ctx.fillStyle = pcol('p',1);
   ctx.fillRect(446, 101, 2.4, 2.4);
   ctx.globalAlpha = 1;
@@ -4529,7 +4555,7 @@ function drawDesk(i){
     const spImg = (typeof ART !== 'undefined' && ART.ok) ? ART.img['x_k_' + (window.SPR_KIND[s.kind] || 'kid1')] : null;
     if(spImg){
       sprSeated = true;
-      drawXPerson(x, y + 1, spImg, i % 2 ? -1 : 1, 0, { seated: true, ph: i * 1.7, H: 31, shakeX: angry && s.kind !== 'print' ? Math.sin(G.t * 30) * 1.2 : 0 });
+      drawXPerson(x, y + 1, spImg, i % 2 ? -1 : 1, 0, { seated: true, ph: i * 1.7, H: 31, shakeX: angry && s.kind !== 'print' ? Math.sin(G.t * 12) * 0.8 : 0 });
     } else drawFigure(x, y - 10, {
       shirt: c.shirt, hair: c.hair, H: 26, seated: true, drop: c.sitT,
       skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: c.wMul,
@@ -4537,7 +4563,7 @@ function drawDesk(i){
       typing: s.kind !== 'print' && !s.virus && s.rebootT <= 0 && eff2(s),
       pose: c.anim || null, animT: c.animT,
       ph: i * 1.7,
-      shakeX: angry && s.kind !== 'print' ? Math.sin(G.t * 30) * 1.4 : 0,
+      shakeX: angry && s.kind !== 'print' ? Math.sin(G.t * 12) * 0.9 : 0,
     });
     const frac = frac0;
     drawRing(x, y - 38, 14, frac, null, 3);
@@ -5076,10 +5102,14 @@ function blitWalkSheet(key, x, baseY, H, dir, moving, dy, action){
   if(action){ row = 3; frame = ({ service: 1, cheer: 2, angry: 3, zzz: 4, wave: 5 })[action] || 0; }
   else if(moving){ row = dy < 0 ? 1 : (dy > 0 ? 0 : 2); frame = 1 + (Math.floor(G.t * (M.fps || 9)) % 4); }
   const w = H * M.fw / M.fh;
+  /* v1.13.0 — سایهٔ زیرِ پا + بابِ لطیفِ راه‌رفتن */
+  const bobM = moving && !action ? Math.abs(Math.sin(G.t * (M.fps || 9))) * 1.1 : 0;
+  ctx.fillStyle = 'rgba(0,0,0,.28)';
+  ctx.beginPath(); ctx.ellipse(x, baseY - 1, w * 0.30, 2.6, 0, 0, TAU); ctx.fill();
   ctx.save();
   ctx.imageSmoothingEnabled = true;
   if(row === 2 && (dir || 1) < 0){ ctx.translate(x, 0); ctx.scale(-1, 1); ctx.translate(-x, 0); }
-  ctx.drawImage(im, frame * M.fw, row * M.fh, M.fw, M.fh, x - w / 2, baseY - H, w, H);
+  ctx.drawImage(im, frame * M.fw, row * M.fh, M.fw, M.fh, x - w / 2, baseY - H - bobM, w, H);
   ctx.restore();
   return true;
 }
@@ -5448,7 +5478,7 @@ function drawHUD(){
 }
 function drawComboFlame(){
   if(G.combo < 2) return;
-  const pulse = 1 + Math.sin(G.t * 8) * 0.08;
+  const pulse = 1 + Math.sin(G.t * 5) * 0.05;
   putGlow(22, 152, 22, hexk('p'), 0.3);
   faText('🔥×' + faNum(G.combo), 22, 152, 11 * pulse, hexk('p'), 'center', true);
 }
@@ -5576,8 +5606,7 @@ function drawMarquee(){
   ctx.strokeStyle = pcol('c', .4); ctx.lineWidth = 1;
   rr(bx, by, bw, bh, 4); ctx.stroke();
   for(let i = 0; i < bw; i += 6){
-    const wave = 0.5 + 0.5 * Math.sin(G.t * 2.2 + i * 0.7);
-    ctx.fillStyle = pcol('c', (0.18 + 0.67 * wave).toFixed(2));
+    ctx.fillStyle = pcol('c', '0.55'); /* v1.13.0 — LED ثابت؛ بدونِ موجِ چشمک */
     ctx.fillRect(bx + i + 2, by - 2.6, 3, 1.6);
     ctx.fillRect(bx + i + 2, by + bh + 1, 3, 1.6);
   }
@@ -5683,7 +5712,7 @@ function drawCat(){
 function drawScene(){
   ctx.save();
   const dfrG = clamp(G.t / DAY_LEN, 0, 1);
-  G.glowMul = dfrG < 0.22 ? 0.9 : dfrG < 0.62 ? 0.75 : dfrG < 0.85 ? 1.0 : 1.25;
+  G.glowMul = dfrG < 0.62 ? 0.9 - (dfrG / 0.62) * 0.14 : 0.76 + ((dfrG - 0.62) / 0.23) * 0.49;
   const z = G.zoom || 1;
   if(z !== 1){
     ctx.translate(ZC.x, ZC.y);
@@ -5693,9 +5722,10 @@ function drawScene(){
   ctx.translate(-G.cam.x, 0);
   if(bgCanvas) ctx.drawImage(bgCanvas, -ox / scale - 20, -oy / scale, bgCanvas.width / (BG_S || scale), bgCanvas.height / (BG_S || scale));
   drawNeonSign();
+  drawWallDeco();
   drawGamingSign();
   drawCrown();
-  drawTwinkles();
+  /* v1.13.0 — twinkles حذف: منبعِ چشمک */
   drawMarquee();
   drawTV();
   drawRack();
@@ -5731,11 +5761,11 @@ function drawScene(){
   ctx.restore();
 }
 function drawGamingSign(){
-  const flick = 0.94 + 0.06 * Math.sin(G.t * 1.3 + 1);
+  const flick = 0.97 + 0.03 * Math.sin(G.t * 0.7 + 1);
   putGlow(500, 66, 30, hexk('c'), 0.35 * flick);
   faText('اتاقِ گیم', 500, 66, 11, pcol('c'), 'center', true);
   for(let i = 0; i < 5; i++){
-    const h = 3 + Math.abs(Math.sin(G.t * 3 + i * 1.1)) * 7;
+    const h = 3 + Math.abs(Math.sin(G.t * 1.2 + i * 0.7)) * 5;
     ctx.fillStyle = pcol(i % 2 ? 'p' : 'g', .55);
     ctx.fillRect(466 + i * 15, 86 - h, 5, h);
   }
@@ -5936,7 +5966,7 @@ window.Gfx = (function(){
     function lightPass(){
       if(G.scene !== 'day' && G.scene !== 'menu') return;
       const dfr = clamp(G.t / DAY_LEN, 0, 1);
-      const dark = dfr < 0.22 ? 0.13 : dfr < 0.62 ? 0.08 : dfr < 0.85 ? 0.20 : 0.30;
+      const dark = dfr < 0.62 ? 0.125 - (dfr / 0.62) * 0.045 : 0.08 + ((dfr - 0.62) / 0.23) * 0.22;
       const cam = G.cam.x, z0 = G.zoom || 1;
 
       lg2.setTransform(1, 0, 0, 1, 0, 0);
@@ -5996,7 +6026,7 @@ window.Gfx = (function(){
         if(!d.init) seedDust(d);
         d.x += d.vx * (G.dt || 1 / 60); d.y += d.vy * (G.dt || 1 / 60);
         if(d.y < 118 || d.x < cam - 24 || d.x > cam + VW + 24) seedDust(d);
-        const a = 0.05 + 0.10 * (Math.sin(G.t * 2.2 + d.ph) + 1) / 2;
+        const a = 0.055 + 0.035 * (Math.sin(G.t * 0.9 + d.ph) + 1) / 2;
         ctx.globalAlpha = a;
         ctx.fillStyle = '#dfe8ff';
         ctx.fillRect(d.x - 0.7, d.y - 0.7, 1.4, 1.4);
@@ -7926,7 +7956,10 @@ function frame(ts){
     G.t += dt;
     try{ tickAmbient(dt); tickParticles(dt); }catch(e){}
   }
-  try{ render(rdt); }catch(e){ console.error('render', e); }
+  try{ render(rdt); }catch(e){ console.error('render', e);
+    /* v1.13.0 — خودترمیمی: خطای پایدارِ sprite → قطعِ spriteها و رندرِ فوریِ برداری */
+    if(typeof ART !== 'undefined' && ART.ok){ ART.ok = false; try{ render(rdt); }catch(e2){} }
+  }
   requestAnimationFrame(frame);
 }
 
@@ -8050,7 +8083,7 @@ document.addEventListener('DOMContentLoaded', init);
  * ذخیره‌ی بازی دست‌نخورده می‌ماند (همان origin و همان localStorage).
  */
 const UPD = {
-  VER: '1.12.2',
+  VER: '1.13.0',
   URL: 'https://raw.githubusercontent.com/Imzayan/cafenet-the-empire/main/update.json',
 
   cmp(a, b) {
@@ -8109,6 +8142,20 @@ const UPD = {
   },
 };
 window.addEventListener('load', () => { try { UPD.check(); } catch (e) {} });
+/* v1.13.0 — سپرِ رسم: هیچ زیرسیستمِ گرافیکی حق ندارد فریم را بیندازد؛
+   خطای sprite → خروجیِ falsy → fallbackِ برداری؛ فریمِ کامل همیشه کشیده می‌شود */
+(function(){
+  var NAMES = ['drawNeonSign','drawWallDeco','drawTV','drawRack','drawMarquee','drawLamps','drawDesk','drawPrintStation','drawConsoles','drawZoneNPCs','drawStaff','drawCat','drawParticles','drawFloaters','drawQueuePeople','drawPerson','drawXPerson','drawFigure','tryWalkSheet','blitWalkSheet','drawClockHands','drawCrown','drawComboFlame','drawPipe','drawChips'];
+  for(var i = 0; i < NAMES.length; i++){
+    (function(n){
+      var f = window[n];
+      if(typeof f !== 'function' || f.__gd) return;
+      var g = function(){ try{ return f.apply(this, arguments); }catch(e){ try{ G._gd = (G._gd || 0) + 1; }catch(e2){} } };
+      g.__gd = true;
+      window[n] = g;
+    })(NAMES[i]);
+  }
+})();
 </script>
 </body>
 </html>
