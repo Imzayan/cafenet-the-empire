@@ -1,7 +1,7 @@
 {
-  "version": "1.6.0",
-  "url": "https://raw.githubusercontent.com/Imzayan/cafenet-the-empire/main/cafnet.html",
-  "notes": "نسخهٔ کیفیت: آدمک‌های HD با صورت و سایه‌پردازی، ریشه‌کنیِ صفحهٔ سیاه روی گوشی (سقفِ رزولوشنِ بوم)، اسکین‌هایی که کلِ کافه را عوض می‌کنند، دو فصلِ داستانِ تازه و متنِ عمیق‌تر",
+  "version": "1.12.2",
+  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.12.2/cafnet.html",
+  "notes": "تکمیلِ گرافیک + مسیرِ دانلودِ jsDelivr (برای شبکه‌هایی که raw گیتهاب را مسدود کرده‌اند)",
   "minApk": 2,
-  "published": "2026-11-20"
+  "published": "2026-11-21"
 }
