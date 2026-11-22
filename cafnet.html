@@ -8,7 +8,7 @@
 try{
   if(!/^https?:/.test(String(location.protocol)) && window === window.parent){
     var _bv = localStorage.getItem('cafnet_bundle_ver');
-    var _bootVer = '1.18.0';
+    var _bootVer = '1.19.0';
     var _nv = function(v){ v = String(v).split('.'); return [+(v[0]||0), +(v[1]||0), +(v[2]||0)]; };
     if(_bv && _bv !== _bootVer){
       var _a = _nv(_bv), _b = _nv(_bootVer), _newer = false;
@@ -1485,7 +1485,7 @@ window.__ASSETS_V3B64 = { files: {
 } };
 
 
-/* v1.18.0 — polyfillِ ellipse برای WebViewهایِ قدیمی */
+/* v1.19.0 — polyfillِ ellipse برای WebViewهایِ قدیمی */
 if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.ellipse) {
   CanvasRenderingContext2D.prototype.ellipse = function (x, y, rx, ry, rot, a0, a1) {
     this.save(); this.translate(x, y); this.rotate(rot || 0); this.scale(rx || 1, ry || 1);
@@ -1543,7 +1543,7 @@ const ART = {
         }
         return Promise.all(jobs).then(() => {
           const _nk = ['c_dl', 'c_kid1w', 't_floor', 'f_burst'], _ng = _nk.filter(function (k9) { return !!ART.img[k9]; }).length;
-          ART.ok = _ng >= 2; /* v1.18.0 — با بیش از نصفِ دارایی‌هایِ اصلی، حالتِ کامل */
+          ART.ok = _ng >= 2; /* v1.19.0 — با بیش از نصفِ دارایی‌هایِ اصلی، حالتِ کامل */
           try { if (typeof buildBG === 'function') buildBG(); } catch (e) {}
         });
       } catch (e) { ART.ok = false; }
@@ -4669,7 +4669,7 @@ function drawDesk(i){
       ctx.beginPath(); ctx.ellipse(x, y - 14, 14, 16, 0, 0, TAU); ctx.fill();
       ctx.fillStyle = KK ? 'rgba(' + rgb(KK.color) + ',0.16)' : 'rgba(139,92,246,0.16)'; /* v1.17.0 — هالهٔ پشتِ مشتری */
       ctx.beginPath(); ctx.ellipse(x, y - 16, 15, 18, 0, 0, TAU); ctx.fill();
-      try { drawXPerson(x, y + 1, spImg, i % 2 ? -1 : 1, 0, { seated: true, ph: i * 1.7, H: 34, shakeX: angry && s.kind !== 'print' ? Math.sin(G.t * 12) * 0.8 : 0 }); } catch (eXP) { drawFigure(x, y - 10, { shirt: c.shirt, hair: c.hair, H: 26, seated: true, drop: c.sitT, skin: c.skin, hairStyle: c.hairStyle, ph: i * 1.7 }); } /* v1.18.0 — سپرِ رندرِ مشتری */
+      try { drawXPerson(x, y + 1, spImg, i % 2 ? -1 : 1, 0, { seated: true, ph: i * 1.7, H: 34, shakeX: angry && s.kind !== 'print' ? Math.sin(G.t * 12) * 0.8 : 0 }); } catch (eXP) { drawFigure(x, y - 10, { shirt: c.shirt, hair: c.hair, H: 26, seated: true, drop: c.sitT, skin: c.skin, hairStyle: c.hairStyle, ph: i * 1.7 }); } /* v1.19.0 — سپرِ رندرِ مشتری */
     } else drawFigure(x, y - 10, {
       shirt: c.shirt, hair: c.hair, H: 26, seated: true, drop: c.sitT,
       skin: c.skin, hairStyle: c.hairStyle, hMul: c.hMul, wMul: c.wMul,
@@ -5129,6 +5129,11 @@ function drawFigure(cx, baseY, o){
     ctx.beginPath(); ctx.moveTo(cx + headR * 0.5, headY - headR * 0.75); ctx.lineTo(cx + headR * 0.8, headY - headR * 0.55); ctx.stroke();
   }
 
+  if(o.beard){ /* v1.19.0 — ریش برایِ شخصیت‌هایِ کانن */
+    ctx.fillStyle = o.beardC || o.hair || '#1a1a1a';
+    ctx.beginPath(); ctx.arc(cx, headY + headR * 0.34, headR * 0.72, 0.12 * Math.PI, 0.88 * Math.PI); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(8,10,14,.5)'; ctx.lineWidth = 0.6; ctx.stroke();
+  }
   /* ---- موی حجم‌دار ---- */
   const hs = o.hairStyle || 'buzz';
   const hc = o.hair || '#1a1a1a';
@@ -5768,57 +5773,66 @@ function applyFounder(){
 }
 applyFounder();
 const CANON_NPCS = [
-  { id: 'nika', img: 'x_npcNika', fig: { shirt: '#22d3ee', hair: '#2a1a3a', skin: '#eec9a8' }, x: 96, y: 336, w: 34, patrol: 13, /* v1.17.0 */
+  { id: 'nika', img: 'x_npcNika', design: { shirt: '#22d3ee', hair: '#2a1a3a', skin: '#eec9a8', pants: '#1d2b45', hairStyle: 'long', headset: true, H: 46, wMul: 0.94 }, x: 96, y: 336, w: 34, patrol: 13, /* v1.17.0 */
     when: () => true, /* v1.17.1 — از شروعِ بازی */
     lines: ['گزارشِ عملیات: چای در حالِ دم‌شدن، سیستم‌ها پایدار، مشتری‌ها خوش‌حال. مدیریت یعنی همین نظمِ بی‌سروصدا.', 'دفترت را مرتب کردم؛ فاکتورها برچسب خوردند و قرضِ عمو رحیم جدول‌بندی شد. نگرانِ عدد نباش، نگرانِ روند باش.'],
     warm: 'امروز دلم می‌خواست کنارت بایستم، نه پشتِ میز. این کافه برای من فقط پروژه نیست.',
     cold: 'اعداد رو به پایین است. اگر برنامه‌ات «صبر» است، من برنامه‌ای برایش ندارم.' },
-  { id: 'kian', img: 'x_npcKian', fig: { shirt: '#38b26a', hair: '#22262a', skin: '#d8b090' }, x: 585, y: 174, w: 36, patrol: 0,
+  { id: 'kian', img: 'x_npcKian', design: { shirt: '#38b26a', hair: '#22262a', skin: '#d8b090', pants: '#26304a', hairStyle: 'spiky', acc: 'glasses', H: 47 }, x: 585, y: 174, w: 36, patrol: 0,
     when: () => true, /* v1.17.1 */
     lines: ['فنِ شمارهٔ ۳ را عوض کردم — دیگر سیلی لازم نیست! راستی اتاقِ زیرزمین بویِ کاغذِ کهنه می‌گیرد؛ شاید چیزی آن‌پایین باشد…', 'لاگِ همهٔ سیست‌ها را گرفتم. اگر NEXUS روتینگی دارد، من اولین کسی هستم که می‌فهمد.'],
     warm: 'یک ایدهٔ مجنون برای میزِ قهرمانی دارم… فقط قبلش یک فاضلاب‌نما لازم دارم. قول می‌دهم خفن شود!',
     cold: 'سخت‌افزار بدونِ اعتماد، فقط آهنِ گران‌قیمت است.' },
-  { id: 'sara', img: 'x_npcSara', fig: { shirt: '#ffd23e', hair: '#1a2a1a', skin: '#c08a58' }, x: 636, y: 152, w: 36, patrol: 9,
+  { id: 'sara', img: 'x_npcSara', design: { shirt: '#ffd23e', hair: '#2a2016', skin: '#c08a58', pants: '#3a2a3a', hairStyle: 'bun', H: 45, wMul: 0.94 }, x: 636, y: 152, w: 36, patrol: 9,
     when: () => true, /* v1.17.1 */
     lines: ['بسکتِ امروز برگزار شد؛ واکنشِ دست‌ها بهتر شده. برای تورنمنتِ بعدی آماده‌ایم.', 'قهرمان از پنجره نمی‌آید؛ از بسکتِ سخت‌گیر می‌آید. تمرینِ فردا ساعتِ ۶ صبح — تیمِ جدید!'],
     warm: 'با این تیم و این مدیریت، اسمِ کافه‌نت را بالای سکویِ جهانی می‌بریم. قولِ حرفه‌ای.',
     cold: 'تمرینِ نصفه‌نیمه قهرمان نمی‌سازد؛ فقط خسته می‌کند.' },
-  { id: 'arman', img: 'x_npcArman', fig: { shirt: '#c03a2a', hair: '#2a1a12', skin: '#e8c8a4' }, x: 370, y: 150, w: 36, patrol: 4,
+  { id: 'arman', img: 'x_npcArman', design: { shirt: '#c03a2a', hair: '#2a1a12', skin: '#e8c8a4', pants: '#232b38', hairStyle: 'buzz', beard: true, beardC: '#3a2a20', H: 49, wMul: 1.16 }, x: 370, y: 150, w: 36, patrol: 4,
     when: () => true, /* v1.17.1 */
     lines: ['کافه‌ات را چک کردم. تمیز… ولی تمیزی شانسی نمی‌آورد؛ استراتژی می‌آورد. هنوز یاد نگرفته‌ای.', 'NEXUS به همهٔ ما فشار می‌آورد. تو هم فقط یک بازیگرِ دیگرِ همینِ بازیِ خشن هستی.'],
     warm: 'شاید بهترین حرکت، روبه‌روشدنِ باهم باشد، نه سرِ هم. پیشنهادِ شراکتِ سرد را جدی بگیر.',
     cold: 'غرورِ ارزان. در بازارِ آزاد می‌بینیمت.' },
 ];
+function drawCanonPerson(n){
+  /* v1.19.0 — چهار شخصیتِ کانن با سیستمِ آدمکِ HD کشیده می‌شوند: مو، لباس، عینک/هدفون/ریش — بدونِ هیچ asset، رویِ هر دستگاهی یکسان */
+  const D = n.design || {};
+  const talk = G.t < (n._talkUntil || 0);
+  try {
+    drawFigure(n._px, n.y + 1, {
+      shirt: D.shirt || '#51637f', hair: D.hair || '#2a2a2a', skin: D.skin || '#e0b080',
+      pants: D.pants || '#232b38', hairStyle: D.hairStyle || 'buzz',
+      acc: D.acc, headset: D.headset, beard: D.beard, beardC: D.beardC,
+      H: D.H || 46, wMul: D.wMul || 1,
+      pose: talk ? 'talk' : 'idle', ph: n.x * 0.7, happy: D.happy
+    });
+  } catch (eCP) { /* آخرین سپر: آدمکِ مستطیلی — فقط fillRect، رویِ هر canvasی کار می‌کند */
+    ctx.fillStyle = D.shirt || '#51637f'; ctx.fillRect(n._px - 6, n.y - 34, 12, 24);
+    ctx.fillStyle = D.skin || '#e0b080'; ctx.fillRect(n._px - 4.5, n.y - 43, 9, 9);
+    ctx.fillStyle = D.hair || '#2a2a2a'; ctx.fillRect(n._px - 5.5, n.y - 45, 11, 4);
+    ctx.fillStyle = D.pants || '#1a202b'; ctx.fillRect(n._px - 5.5, n.y - 10, 11, 10);
+  }
+}
 function drawCanonNPCs(){
   if((G.scene !== 'day' && G.scene !== 'menu') || G.paused) return;
   for(const n of CANON_NPCS){
     if(!n.when()) continue;
-    const im = (typeof ART !== 'undefined' && ART.ok) ? ART.img[n.img] : null;
     n._px = n.x + Math.sin(G.t * 0.7 + n.x) * (n.patrol || 0);
-    const bob = Math.sin(G.t * 2.1 + n.y) * 1.1;
     ctx.fillStyle = 'rgba(0,0,0,.32)';
     ctx.beginPath(); ctx.ellipse(n._px, n.y - 1, n.w * 0.32, 3, 0, 0, TAU); ctx.fill();
-    if(im){
-      const h = 54, w2 = h * im.width / im.height; /* v1.17.0 — پیکسل‌آرتِ 1:1 بدونِ مالش */
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(im, n._px - w2 / 2, n.y - h + bob, w2, h);
-    } else {
-      const F = n.fig || {}; /* v1.18.0 — بدونِ asset هم آدمکِ واقعی */
-      try { drawFigure(n._px, n.y + 1, { shirt: F.shirt || '#51637f', hair: F.hair || '#2a2a2a', skin: F.skin || '#e0b080', H: 42, ph: n.x }); } catch (eNF) {
-        ctx.fillStyle = '#51637f'; rr(n._px - 7, n.y - 30 + bob, 14, 26, 5); ctx.fill();
-      }
-    }
+    drawCanonPerson(n); /* v1.19.0 — شخصیتِ طراحی‌شده؛ بدونِ هیچ وابستگی به asset */
     /* نام‌کِ بالای سر */
     const ch = CHARS[n.id === 'arman' ? 'arman' : n.id] || {};
     const nm = ch.name || n.id;
     ctx.fillStyle = 'rgba(10,14,22,.82)';
     const tw = nm.length * 7 + 10;
-    rr(n._px - tw / 2, n.y - 52, tw, 12, 5); ctx.fill();
-    faText(nm, n._px, n.y - 43.5, 8, '#9fb6ff', 'center', true);
+    rr(n._px - tw / 2, n.y - 66, tw, 12, 5); ctx.fill(); /* v1.19.0 */
+    faText(nm, n._px, n.y - 57.5, 8, '#9fb6ff', 'center', true); /* v1.19.0 */
   }
 }
 function npcBubble(n, ch){
   try{
+    n._talkUntil = (typeof G !== 'undefined' && G.t ? G.t : 0) + 3.6; /* v1.19.0 — حینِ حرف‌زدن، پزِ talk */
     if(window.__npcBubEl) window.__npcBubEl.remove();
     const d = document.createElement('div');
     d.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);max-width:86vw;width:max-content;background:#141a26;border:1px solid #2a3550;border-radius:12px;padding:10px 14px;z-index:98;font-size:12px;direction:rtl;color:#dfe8ff;box-shadow:0 8px 24px rgba(0,0,0,.5);line-height:1.7';
@@ -6041,7 +6055,7 @@ function render(dt){
     ctx.save();
     ctx.translate(ox, oy);
     ctx.scale(scale, scale);
-    try { drawScene(); } catch (eDR) { /* v1.18.0 — سپرِ حلقهٔ رندر */ }
+    try { drawScene(); } catch (eDR) { /* v1.19.0 — سپرِ حلقهٔ رندر */ }
     if(vignCanvas && (!G.fxLite || frames % 2 === 0))
       ctx.drawImage(vignCanvas, -ox / scale, -oy / scale, cv.width / scale, cv.height / scale);
     const lg0 = (typeof ART !== 'undefined') ? ART.img['x_logoTop'] : null;
@@ -6058,7 +6072,7 @@ function render(dt){
   ctx.translate(ox, oy);
   ctx.scale(scale, scale);
   if(G.shake > 0) ctx.translate(rnd(-6, 6) * G.shake, rnd(-6, 6) * G.shake);
-  try { drawScene(); } catch (eDR) { /* v1.18.0 — سپرِ حلقهٔ رندر */ }
+  try { drawScene(); } catch (eDR) { /* v1.19.0 — سپرِ حلقهٔ رندر */ }
   if(vignCanvas && (!G.fxLite || frames % 2 === 0))
     ctx.drawImage(vignCanvas, -ox / scale, -oy / scale, cv.width / scale, cv.height / scale);
   drawComboFlame();
@@ -6307,7 +6321,7 @@ window.Gfx = (function(){
         if(!s || !s.kind || s.virus || s.rebootT > 0) continue;
         const p = deskPos(i);
         if(p.x < G.cam.x - 40 || p.x > G.cam.x + VW + 40) continue;
-        const K = KINDS[s.kind] || KINDS.dl; /* v1.18.0 — kindِ ناشناخته رندر را نمی‌کُشد */
+        const K = KINDS[s.kind] || KINDS.dl; /* v1.19.0 — kindِ ناشناخته رندر را نمی‌کُشد */
         const col = rgb(K.color);
         ctx.globalAlpha = 0.10 + (s.vipDesk ? 0.05 : 0);
         ctx.drawImage(cone(col), p.x - 24, p.y - 4, 48, 46);
@@ -8449,7 +8463,7 @@ function refreshMenu(){
     $('btnCont').textContent = 'ادامه — هفته ' + faNum(s.week) + ' روز ' + faNum(s.day) + ' · ' + fmtK(s.money);
   }
   $('btnPrem').textContent = '🪙 پرمیوم' + (s.coins ? ' — ' + faNum(s.coins) + ' سکه' : '');
-  if(!$('mVer')){ const ENG = (String(navigator.userAgent).match(/Chrom(?:e|ium)\/(\d+)/) || ['', 'webview'])[1]; const _mEl = $('menu') || $('menuLegacy'); if(_mEl) _mEl.insertAdjacentHTML('beforeend', '<div id="mVer" style="font-size:11px;color:#8ea0b8;margin-top:10px;letter-spacing:.4px;direction:ltr">CAFENET v1.18.0 · Chrome/' + ENG + '</div>'); /* v1.18.0 — نسخه + موتور */ setTimeout(function(){ try{ const mv = $('mVer'); if(mv) mv.textContent = 'CAFENET v1.18.0 · Chrome/' + ENG + ' · گرافیک: ' + (ART.ok ? 'کامل' : 'ساده'); }catch(e){} }, 2800); }
+  if(!$('mVer')){ const ENG = (String(navigator.userAgent).match(/Chrom(?:e|ium)\/(\d+)/) || ['', 'webview'])[1]; const _mEl = $('menu') || $('menuLegacy'); if(_mEl) _mEl.insertAdjacentHTML('beforeend', '<div id="mVer" style="font-size:11px;color:#8ea0b8;margin-top:10px;letter-spacing:.4px;direction:ltr">CAFENET v1.19.0 · Chrome/' + ENG + '</div>'); /* v1.19.0 — نسخه + موتور */ setTimeout(function(){ try{ const mv = $('mVer'); if(mv) mv.textContent = 'CAFENET v1.19.0 · Chrome/' + ENG + ' · گرافیک: ' + (ART.ok ? 'کامل' : 'ساده'); }catch(e){} }, 2800); }
   const fame = s.fame || 40, lv = Math.min(10, s._level || 1);
   const stars = clamp(Math.round(fame / 20), 1, 5);
   const rank = s.crowned ? 1 : Math.max(2, 99 - Math.round(fame) - 2 * ((s.stats && s.stats.weeksPaid) || 0) - 2 * lv);
@@ -8752,7 +8766,7 @@ document.addEventListener('DOMContentLoaded', init);
  * ذخیره‌ی بازی دست‌نخورده می‌ماند (همان origin و همان localStorage).
  */
 const UPD = {
-  VER: '1.18.0',
+  VER: '1.19.0',
   /* v1.14.0 — آینه‌ها: rawِ گیت‌هاب روی خیلی از شبکه‌های ایران باز نمی‌شود؛
      همهٔ درخواست‌ها زنجیرهٔ آینه دارند + timeoutِ ۷ث + تلاشِ فوری و تکرارِ خودکار */
   URLS: [ /* v1.17.1 — rawِ بدونِ کش اول؛ آینه‌های کش‌دار پشتیبان */

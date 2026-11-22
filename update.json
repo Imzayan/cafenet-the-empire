@@ -1,7 +1,7 @@
 {
-  "version": "1.18.0",
-  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.18.0/cafnet.html",
-  "notes": "ضدِ گلوله: حتی اگر assetها لود نشوند، مشتری‌ها و ۴ شخصیتِ کانن همیشه دیده می‌شوند · همهٔ گرافیک PNG (بدونِ webp) · نشانِ تشخیصیِ نسخه و موتور در منو",
+  "version": "1.19.0",
+  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.19.0/cafnet.html",
+  "notes": "شخصیت‌سازیِ واقعی: نیکا (موی بلند + هدفون)، کیان (عینک + موی سیخ‌سیخی)، سارا (گوجه‌بندیِ موی کلاه‌دار)، آرمان (ریش + کتِ قرمز) — بدونِ هیچ asset، رویِ هر دستگاهی یکسان · حینِ حرف‌زدن، پزِ گفتگو",
   "minApk": 2,
   "published": "2026-11-22"
 }
