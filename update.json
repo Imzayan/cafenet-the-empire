@@ -1,7 +1,7 @@
 {
-  "version": "1.17.1",
-  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.17.1/cafnet.html",
-  "notes": "رفعِ ریشه‌ای: چهار شخصیتِ کانن از همان شروعِ بازی در صحنه + OTAِ بدونِ کش + پرترهٔ پشتیبانِ پیکسلی + مشتری‌های با کنتراستِ بیشتر",
+  "version": "1.18.0",
+  "url": "https://cdn.jsdelivr.net/gh/Imzayan/cafenet-the-empire@v1.18.0/cafnet.html",
+  "notes": "ضدِ گلوله: حتی اگر assetها لود نشوند، مشتری‌ها و ۴ شخصیتِ کانن همیشه دیده می‌شوند · همهٔ گرافیک PNG (بدونِ webp) · نشانِ تشخیصیِ نسخه و موتور در منو",
   "minApk": 2,
   "published": "2026-11-22"
 }
